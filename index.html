@@ -1,0 +1,5482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Challenge Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            font-size: 0.9em;
+            color: #495057;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, button {
+            padding: 10px 16px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 1em;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:hover, select:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 10px 24px;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+
+        .question-panel {
+            padding: 30px;
+            border-right: 2px solid #e9ecef;
+            overflow-y: auto;
+            max-height: 700px;
+        }
+
+        .question-panel h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .difficulty-beginner {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .difficulty-mid {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .question-description {
+            line-height: 1.8;
+            color: #495057;
+            margin-bottom: 20px;
+        }
+
+        .examples {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .examples h3 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .example {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .code-panel {
+            display: flex;
+            flex-direction: column;
+            background: #1e1e1e;
+        }
+
+        .editor-header {
+            background: #2d2d30;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #3e3e42;
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            padding: 6px 16px;
+            background: #3e3e42;
+            color: #ccc;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .lang-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .code-editor {
+            flex: 1;
+            padding: 20px;
+            background: #1e1e1e;
+            overflow-y: auto;
+        }
+
+        textarea {
+            width: 100%;
+            height: 400px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            padding: 0;
+        }
+
+        .action-buttons {
+            padding: 20px;
+            background: #2d2d30;
+            display: flex;
+            gap: 12px;
+            border-top: 1px solid #3e3e42;
+        }
+
+        .run-btn {
+            background: #4caf50;
+            flex: 1;
+        }
+
+        .run-btn:hover {
+            background: #45a049;
+        }
+
+        .reset-btn {
+            background: #f44336;
+        }
+
+        .reset-btn:hover {
+            background: #da190b;
+        }
+
+        .output-panel {
+            grid-column: 1 / -1;
+            padding: 25px;
+            background: #f8f9fa;
+            border-top: 2px solid #e9ecef;
+            min-height: 150px;
+        }
+
+        .output-panel h3 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .test-results {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .test-case {
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+
+        .test-case.passed {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .test-case.failed {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .test-case-header {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .test-case-details {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #495057;
+        }
+
+        .summary {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .summary.success {
+            color: #28a745;
+        }
+
+        .summary.error {
+            color: #dc3545;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .question-panel {
+                border-right: none;
+                border-bottom: 2px solid #e9ecef;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💻 Code Challenge Platform</h1>
+            <p>Practice coding challenges for Software Development</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Category</label>
+                <select id="category">
+                    <option value="general">General Development</option>
+                    <option value="frontend">Frontend Development</option>
+                    <option value="backend">Backend Development</option>
+                    <option value="situational">Situational & Concepts</option>
+                    <option value="behavioral">Behavioral Questions</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Difficulty</label>
+                <select id="difficulty">
+                    <option value="beginner">Beginner</option>
+                    <option value="mid">Mid Level</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>&nbsp;</label>
+                <button onclick="loadChallenge()">Load Challenge</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="question-panel">
+                <h2 id="questionTitle">Select a challenge to begin</h2>
+                <span id="difficultyBadge" class="difficulty-badge"></span>
+                <div id="questionDescription" class="question-description">
+                    Choose a category and difficulty level, then click "Load Challenge" to start practicing!
+                </div>
+                <div id="examples" class="examples" style="display: none;">
+                    <h3>Examples:</h3>
+                    <div id="examplesList"></div>
+                </div>
+            </div>
+
+            <div class="code-panel">
+                <div class="editor-header">
+                    <div class="language-selector">
+                        <button class="lang-btn active" onclick="switchLanguage('python')">Python</button>
+                        <button class="lang-btn" onclick="switchLanguage('javascript')">JavaScript</button>
+                    </div>
+                    <span style="color: #ccc; font-size: 0.9em;">Code Editor</span>
+                </div>
+                <div class="code-editor">
+                    <textarea id="codeInput" placeholder="Write your code here..."></textarea>
+                </div>
+                <div class="action-buttons">
+                    <button class="run-btn" onclick="runCode()">▶ Run Code</button>
+                    <button class="reset-btn" onclick="resetCode()">↻ Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="output-panel">
+            <h3>Output & Test Results</h3>
+            <div id="output" class="test-results">
+                <p style="color: #6c757d;">Run your code to see test results here...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLanguage = 'python';
+        let currentChallenge = null;
+
+        const challenges = {
+            general: {
+                beginner: [
+                    {
+                        title: "Reverse a String",
+                        description: "Write a function that takes a string as input and returns the string reversed.",
+                        examples: [
+                            { input: '"hello"', output: '"olleh"' },
+                            { input: '"Python"', output: '"nohtyP"' }
+                        ],
+                        starterCode: {
+                            python: `def reverse_string(s):
+    # Write your code here
+    pass`,
+                            javascript: `function reverseString(s) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['hello'], expected: 'olleh' },
+                            { input: ['Python'], expected: 'nohtyP' },
+                            { input: [''], expected: '' },
+                            { input: ['a'], expected: 'a' }
+                        ]
+                    },
+                    {
+                        title: "Find Maximum Number",
+                        description: "Write a function that takes an array/list of numbers and returns the largest number.",
+                        examples: [
+                            { input: '[1, 5, 3, 9, 2]', output: '9' },
+                            { input: '[-1, -5, -3]', output: '-1' }
+                        ],
+                        starterCode: {
+                            python: `def find_max(numbers):
+    # Write your code here
+    pass`,
+                            javascript: `function findMax(numbers) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[1, 5, 3, 9, 2]], expected: 9 },
+                            { input: [[-1, -5, -3]], expected: -1 },
+                            { input: [[42]], expected: 42 },
+                            { input: [[10, 20, 30, 40]], expected: 40 }
+                        ]
+                    },
+                    {
+                        title: "Check Palindrome",
+                        description: "Write a function that checks if a given string is a palindrome (reads the same forwards and backwards). Ignore case and spaces.",
+                        examples: [
+                            { input: '"racecar"', output: 'true' },
+                            { input: '"hello"', output: 'false' },
+                            { input: '"A man a plan a canal Panama"', output: 'true' }
+                        ],
+                        starterCode: {
+                            python: `def is_palindrome(s):
+    # Write your code here
+    pass`,
+                            javascript: `function isPalindrome(s) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['racecar'], expected: true },
+                            { input: ['hello'], expected: false },
+                            { input: ['A man a plan a canal Panama'], expected: true },
+                            { input: [''], expected: true }
+                        ]
+                    },
+                    {
+                        title: "Sum of Array",
+                        description: "Write a function that calculates the sum of all numbers in an array.",
+                        examples: [
+                            { input: '[1, 2, 3, 4, 5]', output: '15' },
+                            { input: '[-1, -2, 3]', output: '0' }
+                        ],
+                        starterCode: {
+                            python: `def array_sum(numbers):
+    # Write your code here
+    pass`,
+                            javascript: `function arraySum(numbers) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[1, 2, 3, 4, 5]], expected: 15 },
+                            { input: [[-1, -2, 3]], expected: 0 },
+                            { input: [[]], expected: 0 },
+                            { input: [[100]], expected: 100 }
+                        ]
+                    },
+                    {
+                        title: "Count Vowels",
+                        description: "Write a function that counts the number of vowels (a, e, i, o, u) in a string. Case insensitive.",
+                        examples: [
+                            { input: '"hello"', output: '2' },
+                            { input: '"JavaScript"', output: '3' }
+                        ],
+                        starterCode: {
+                            python: `def count_vowels(s):
+    # Write your code here
+    pass`,
+                            javascript: `function countVowels(s) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['hello'], expected: 2 },
+                            { input: ['JavaScript'], expected: 3 },
+                            { input: ['xyz'], expected: 0 },
+                            { input: ['AEIOU'], expected: 5 }
+                        ]
+                    },
+                    {
+                        title: "FizzBuzz",
+                        description: "Write a function that returns an array of numbers from 1 to n, but for multiples of 3 replace with 'Fizz', for multiples of 5 replace with 'Buzz', and for multiples of both replace with 'FizzBuzz'.",
+                        examples: [
+                            { input: '5', output: '[1, 2, "Fizz", 4, "Buzz"]' },
+                            { input: '15', output: '[1, 2, "Fizz", 4, "Buzz", "Fizz", 7, 8, "Fizz", "Buzz", 11, "Fizz", 13, 14, "FizzBuzz"]' }
+                        ],
+                        starterCode: {
+                            python: `def fizz_buzz(n):
+    # Write your code here
+    pass`,
+                            javascript: `function fizzBuzz(n) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [5], expected: [1, 2, 'Fizz', 4, 'Buzz'] },
+                            { input: [15], expected: [1, 2, 'Fizz', 4, 'Buzz', 'Fizz', 7, 8, 'Fizz', 'Buzz', 11, 'Fizz', 13, 14, 'FizzBuzz'] }
+                        ]
+                    },
+                    {
+                        title: "Remove Duplicates",
+                        description: "Write a function that removes duplicate values from an array and returns a new array with unique values only.",
+                        examples: [
+                            { input: '[1, 2, 2, 3, 4, 4, 5]', output: '[1, 2, 3, 4, 5]' },
+                            { input: '["a", "b", "a", "c"]', output: '["a", "b", "c"]' }
+                        ],
+                        starterCode: {
+                            python: `def remove_duplicates(arr):
+    # Write your code here
+    pass`,
+                            javascript: `function removeDuplicates(arr) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[1, 2, 2, 3, 4, 4, 5]], expected: [1, 2, 3, 4, 5] },
+                            { input: [['a', 'b', 'a', 'c']], expected: ['a', 'b', 'c'] },
+                            { input: [[]], expected: [] }
+                        ]
+                    },
+                    {
+                        title: "Find Factorial",
+                        description: "Write a function that calculates the factorial of a non-negative integer n. Factorial of n (n!) is the product of all positive integers less than or equal to n.",
+                        examples: [
+                            { input: '5', output: '120' },
+                            { input: '0', output: '1' },
+                            { input: '3', output: '6' }
+                        ],
+                        starterCode: {
+                            python: `def factorial(n):
+    # Write your code here
+    pass`,
+                            javascript: `function factorial(n) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [5], expected: 120 },
+                            { input: [0], expected: 1 },
+                            { input: [3], expected: 6 },
+                            { input: [1], expected: 1 }
+                        ]
+                    },
+                    {
+                        title: "Capitalize Words",
+                        description: "Write a function that capitalizes the first letter of each word in a string.",
+                        examples: [
+                            { input: '"hello world"', output: '"Hello World"' },
+                            { input: '"javascript is fun"', output: '"Javascript Is Fun"' }
+                        ],
+                        starterCode: {
+                            python: `def capitalize_words(s):
+    # Write your code here
+    pass`,
+                            javascript: `function capitalizeWords(s) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['hello world'], expected: 'Hello World' },
+                            { input: ['javascript is fun'], expected: 'Javascript Is Fun' },
+                            { input: ['a'], expected: 'A' }
+                        ]
+                    },
+                    {
+                        title: "Find Even Numbers",
+                        description: "Write a function that filters an array and returns only the even numbers.",
+                        examples: [
+                            { input: '[1, 2, 3, 4, 5, 6]', output: '[2, 4, 6]' },
+                            { input: '[1, 3, 5]', output: '[]' }
+                        ],
+                        starterCode: {
+                            python: `def get_even_numbers(numbers):
+    # Write your code here
+    pass`,
+                            javascript: `function getEvenNumbers(numbers) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[1, 2, 3, 4, 5, 6]], expected: [2, 4, 6] },
+                            { input: [[1, 3, 5]], expected: [] },
+                            { input: [[0, -2, -4]], expected: [0, -2, -4] }
+                        ]
+                    }
+                ],
+                mid: [
+                    {
+                        title: "Two Sum Problem",
+                        description: "Given an array of integers and a target sum, return the indices of two numbers that add up to the target. You may assume each input has exactly one solution.",
+                        examples: [
+                            { input: 'nums = [2, 7, 11, 15], target = 9', output: '[0, 1]' },
+                            { input: 'nums = [3, 2, 4], target = 6', output: '[1, 2]' }
+                        ],
+                        starterCode: {
+                            python: `def two_sum(nums, target):
+    # Write your code here
+    pass`,
+                            javascript: `function twoSum(nums, target) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[2, 7, 11, 15], 9], expected: [0, 1] },
+                            { input: [[3, 2, 4], 6], expected: [1, 2] },
+                            { input: [[3, 3], 6], expected: [0, 1] }
+                        ]
+                    },
+                    {
+                        title: "Anagram Checker",
+                        description: "Write a function that checks if two strings are anagrams of each other (contain the same characters in different order). Ignore spaces and case.",
+                        examples: [
+                            { input: '"listen", "silent"', output: 'true' },
+                            { input: '"hello", "world"', output: 'false' }
+                        ],
+                        starterCode: {
+                            python: `def are_anagrams(s1, s2):
+    # Write your code here
+    pass`,
+                            javascript: `function areAnagrams(s1, s2) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['listen', 'silent'], expected: true },
+                            { input: ['hello', 'world'], expected: false },
+                            { input: ['The Eyes', 'They See'], expected: true }
+                        ]
+                    },
+                    {
+                        title: "Find Missing Number",
+                        description: "Given an array containing n distinct numbers from 0 to n, find the missing number. The array will have all numbers except one.",
+                        examples: [
+                            { input: '[3, 0, 1]', output: '2' },
+                            { input: '[0, 1]', output: '2' },
+                            { input: '[9,6,4,2,3,5,7,0,1]', output: '8' }
+                        ],
+                        starterCode: {
+                            python: `def find_missing_number(nums):
+    # Write your code here
+    pass`,
+                            javascript: `function findMissingNumber(nums) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[3, 0, 1]], expected: 2 },
+                            { input: [[0, 1]], expected: 2 },
+                            { input: [[9,6,4,2,3,5,7,0,1]], expected: 8 }
+                        ]
+                    },
+                    {
+                        title: "Longest Substring Without Repeating Characters",
+                        description: "Find the length of the longest substring without repeating characters.",
+                        examples: [
+                            { input: '"abcabcbb"', output: '3' },
+                            { input: '"bbbbb"', output: '1' },
+                            { input: '"pwwkew"', output: '3' }
+                        ],
+                        starterCode: {
+                            python: `def length_of_longest_substring(s):
+    # Write your code here
+    pass`,
+                            javascript: `function lengthOfLongestSubstring(s) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['abcabcbb'], expected: 3 },
+                            { input: ['bbbbb'], expected: 1 },
+                            { input: ['pwwkew'], expected: 3 }
+                        ]
+                    },
+                    {
+                        title: "Merge Sorted Arrays",
+                        description: "Given two sorted arrays, merge them into one sorted array.",
+                        examples: [
+                            { input: 'arr1 = [1, 3, 5], arr2 = [2, 4, 6]', output: '[1, 2, 3, 4, 5, 6]' },
+                            { input: 'arr1 = [1], arr2 = [2]', output: '[1, 2]' }
+                        ],
+                        starterCode: {
+                            python: `def merge_sorted_arrays(arr1, arr2):
+    # Write your code here
+    pass`,
+                            javascript: `function mergeSortedArrays(arr1, arr2) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[1, 3, 5], [2, 4, 6]], expected: [1, 2, 3, 4, 5, 6] },
+                            { input: [[1], [2]], expected: [1, 2] },
+                            { input: [[], [1, 2, 3]], expected: [1, 2, 3] }
+                        ]
+                    },
+                    {
+                        title: "Valid Parentheses",
+                        description: "Given a string containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid. An input string is valid if brackets are closed in the correct order.",
+                        examples: [
+                            { input: '"()"', output: 'true' },
+                            { input: '"()[]{}"', output: 'true' },
+                            { input: '"(]"', output: 'false' }
+                        ],
+                        starterCode: {
+                            python: `def is_valid_parentheses(s):
+    # Write your code here
+    pass`,
+                            javascript: `function isValidParentheses(s) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['()'], expected: true },
+                            { input: ['()[]{}'], expected: true },
+                            { input: ['(]'], expected: false },
+                            { input: ['([)]'], expected: false }
+                        ]
+                    },
+                    {
+                        title: "Rotate Array",
+                        description: "Rotate an array to the right by k steps. For example, rotating [1,2,3,4,5] by 2 steps gives [4,5,1,2,3].",
+                        examples: [
+                            { input: 'nums = [1,2,3,4,5], k = 2', output: '[4,5,1,2,3]' },
+                            { input: 'nums = [1,2,3], k = 4', output: '[3,1,2]' }
+                        ],
+                        starterCode: {
+                            python: `def rotate_array(nums, k):
+    # Write your code here
+    pass`,
+                            javascript: `function rotateArray(nums, k) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[1,2,3,4,5], 2], expected: [4,5,1,2,3] },
+                            { input: [[1,2,3], 4], expected: [3,1,2] }
+                        ]
+                    },
+                    {
+                        title: "Find Majority Element",
+                        description: "Find the majority element in an array. The majority element is the element that appears more than n/2 times where n is the array length.",
+                        examples: [
+                            { input: '[3,2,3]', output: '3' },
+                            { input: '[2,2,1,1,1,2,2]', output: '2' }
+                        ],
+                        starterCode: {
+                            python: `def majority_element(nums):
+    # Write your code here
+    pass`,
+                            javascript: `function majorityElement(nums) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[3,2,3]], expected: 3 },
+                            { input: [[2,2,1,1,1,2,2]], expected: 2 }
+                        ]
+                    },
+                    {
+                        title: "Product of Array Except Self",
+                        description: "Given an array nums, return an array where each element is the product of all elements except itself. Do not use division.",
+                        examples: [
+                            { input: '[1,2,3,4]', output: '[24,12,8,6]' },
+                            { input: '[5,2]', output: '[2,5]' }
+                        ],
+                        starterCode: {
+                            python: `def product_except_self(nums):
+    # Write your code here
+    pass`,
+                            javascript: `function productExceptSelf(nums) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[1,2,3,4]], expected: [24,12,8,6] },
+                            { input: [[5,2]], expected: [2,5] }
+                        ]
+                    },
+                    {
+                        title: "First Non-Repeating Character",
+                        description: "Find the first non-repeating character in a string and return its index. If it doesn't exist, return -1.",
+                        examples: [
+                            { input: '"leetcode"', output: '0' },
+                            { input: '"loveleetcode"', output: '2' },
+                            { input: '"aabb"', output: '-1' }
+                        ],
+                        starterCode: {
+                            python: `def first_unique_char(s):
+    # Write your code here
+    pass`,
+                            javascript: `function firstUniqueChar(s) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['leetcode'], expected: 0 },
+                            { input: ['loveleetcode'], expected: 2 },
+                            { input: ['aabb'], expected: -1 }
+                        ]
+                    }
+                ]
+            },
+            frontend: {
+                beginner: [
+                    {
+                        title: "Validate Email Format",
+                        description: "Write a function that checks if a given string is a valid email format. A valid email contains '@' and a domain with at least one '.' after the '@'.",
+                        examples: [
+                            { input: '"user@example.com"', output: 'true' },
+                            { input: '"invalid.email"', output: 'false' },
+                            { input: '"test@domain"', output: 'false' }
+                        ],
+                        starterCode: {
+                            python: `def is_valid_email(email):
+    # Write your code here
+    pass`,
+                            javascript: `function isValidEmail(email) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['user@example.com'], expected: true },
+                            { input: ['invalid.email'], expected: false },
+                            { input: ['test@domain'], expected: false },
+                            { input: ['hello@world.co.uk'], expected: true }
+                        ]
+                    },
+                    {
+                        title: "Toggle Array Element",
+                        description: "Write a function that takes an array and a value. If the value exists in the array, remove it. If it doesn't exist, add it. Return the modified array.",
+                        examples: [
+                            { input: 'arr = [1, 2, 3], value = 2', output: '[1, 3]' },
+                            { input: 'arr = [1, 2, 3], value = 4', output: '[1, 2, 3, 4]' }
+                        ],
+                        starterCode: {
+                            python: `def toggle_element(arr, value):
+    # Write your code here
+    pass`,
+                            javascript: `function toggleElement(arr, value) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[1, 2, 3], 2], expected: [1, 3] },
+                            { input: [[1, 2, 3], 4], expected: [1, 2, 3, 4] },
+                            { input: [[], 1], expected: [1] }
+                        ]
+                    },
+                    {
+                        title: "Create Query String",
+                        description: "Write a function that converts an object into a URL query string. For example, {name: 'John', age: 30} becomes 'name=John&age=30'.",
+                        examples: [
+                            { input: '{name: "John", age: 30}', output: '"name=John&age=30"' },
+                            { input: '{search: "javascript", page: 1}', output: '"search=javascript&page=1"' }
+                        ],
+                        starterCode: {
+                            python: `def create_query_string(obj):
+    # Write your code here
+    pass`,
+                            javascript: `function createQueryString(obj) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [{name: 'John', age: 30}], expected: 'name=John&age=30' },
+                            { input: [{search: 'javascript', page: 1}], expected: 'search=javascript&page=1' }
+                        ]
+                    },
+                    {
+                        title: "Get DOM Element by Class",
+                        description: "Write a function that simulates getting elements by class name. Given an array of objects with a 'class' property, return all objects that contain the specified class.",
+                        examples: [
+                            { input: 'elements = [{class: "btn primary"}, {class: "btn"}], className = "btn"', output: '[{class: "btn primary"}, {class: "btn"}]' }
+                        ],
+                        starterCode: {
+                            python: `def get_by_class(elements, class_name):
+    # Write your code here
+    pass`,
+                            javascript: `function getByClass(elements, className) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[{class: 'btn primary'}, {class: 'btn'}, {class: 'link'}], 'btn'], expected: [{class: 'btn primary'}, {class: 'btn'}] }
+                        ]
+                    },
+                    {
+                        title: "Format Currency",
+                        description: "Write a function that formats a number as currency with commas and two decimal places. For example, 1234.5 becomes '1,234.50'.",
+                        examples: [
+                            { input: '1234.5', output: '"1,234.50"' },
+                            { input: '1000000', output: '"1,000,000.00"' }
+                        ],
+                        starterCode: {
+                            python: `def format_currency(num):
+    # Write your code here
+    pass`,
+                            javascript: `function formatCurrency(num) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [1234.5], expected: '1,234.50' },
+                            { input: [1000000], expected: '1,000,000.00' }
+                        ]
+                    },
+                    {
+                        title: "Truncate String",
+                        description: "Write a function that truncates a string to a specified length and adds '...' if it was truncated.",
+                        examples: [
+                            { input: 'text = "Hello World", maxLength = 8', output: '"Hello..."' },
+                            { input: 'text = "Hi", maxLength = 5', output: '"Hi"' }
+                        ],
+                        starterCode: {
+                            python: `def truncate_string(text, max_length):
+    # Write your code here
+    pass`,
+                            javascript: `function truncateString(text, maxLength) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['Hello World', 8], expected: 'Hello...' },
+                            { input: ['Hi', 5], expected: 'Hi' }
+                        ]
+                    },
+                    {
+                        title: "Parse Cookies",
+                        description: "Write a function that parses a cookie string and returns an object. Cookie format: 'key1=value1; key2=value2'.",
+                        examples: [
+                            { input: '"user=John; session=abc123"', output: '{user: "John", session: "abc123"}' }
+                        ],
+                        starterCode: {
+                            python: `def parse_cookies(cookie_string):
+    # Write your code here
+    pass`,
+                            javascript: `function parseCookies(cookieString) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['user=John; session=abc123'], expected: {user: 'John', session: 'abc123'} },
+                            { input: ['theme=dark'], expected: {theme: 'dark'} }
+                        ]
+                    },
+                    {
+                        title: "RGB to Hex",
+                        description: "Write a function that converts RGB color values to hexadecimal format. Input: r, g, b (0-255). Output: '#RRGGBB'.",
+                        examples: [
+                            { input: '255, 0, 0', output: '"#FF0000"' },
+                            { input: '0, 255, 0', output: '"#00FF00"' }
+                        ],
+                        starterCode: {
+                            python: `def rgb_to_hex(r, g, b):
+    # Write your code here
+    pass`,
+                            javascript: `function rgbToHex(r, g, b) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [255, 0, 0], expected: '#FF0000' },
+                            { input: [0, 255, 0], expected: '#00FF00' },
+                            { input: [0, 0, 255], expected: '#0000FF' }
+                        ]
+                    },
+                    {
+                        title: "Local Storage Helper",
+                        description: "Create a function that safely gets a value from an object simulating localStorage. Return the parsed JSON value if it exists, otherwise return null.",
+                        examples: [
+                            { input: 'storage = {"user": "{\\"name\\":\\"John\\"}"}, key = "user"', output: '{name: "John"}' }
+                        ],
+                        starterCode: {
+                            python: `def get_storage_item(storage, key):
+    # Write your code here
+    pass`,
+                            javascript: `function getStorageItem(storage, key) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [{user: '{"name":"John"}'}, 'user'], expected: {name: 'John'} },
+                            { input: [{}, 'missing'], expected: null }
+                        ]
+                    },
+                    {
+                        title: "Slugify String",
+                        description: "Convert a string to a URL-friendly slug: lowercase, replace spaces with hyphens, remove special characters.",
+                        examples: [
+                            { input: '"Hello World!"', output: '"hello-world"' },
+                            { input: '"JavaScript is Awesome"', output: '"javascript-is-awesome"' }
+                        ],
+                        starterCode: {
+                            python: `def slugify(text):
+    # Write your code here
+    pass`,
+                            javascript: `function slugify(text) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['Hello World!'], expected: 'hello-world' },
+                            { input: ['JavaScript is Awesome'], expected: 'javascript-is-awesome' }
+                        ]
+                    }
+                ],
+                mid: [
+                    {
+                        title: "Debounce Function",
+                        description: "Create a debounce function that delays invoking a function until after a specified wait time has elapsed since the last time it was invoked. Return a wrapper function.",
+                        examples: [
+                            { input: 'Function called rapidly should only execute once after delay', output: 'Single execution' }
+                        ],
+                        starterCode: {
+                            python: `def debounce(func, wait):
+    # Write your code here
+    pass`,
+                            javascript: `function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        // Write your code here
+    };
+}`
+                        },
+                        testCases: [
+                            { input: [() => 'executed', 100], expected: 'function' }
+                        ]
+                    },
+                    {
+                        title: "Deep Clone Object",
+                        description: "Write a function that creates a deep copy of an object (including nested objects and arrays).",
+                        examples: [
+                            { input: '{a: 1, b: {c: 2}}', output: '{a: 1, b: {c: 2}} (new object)' }
+                        ],
+                        starterCode: {
+                            python: `def deep_clone(obj):
+    # Write your code here
+    pass`,
+                            javascript: `function deepClone(obj) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [{a: 1, b: {c: 2}}], expected: {a: 1, b: {c: 2}} }
+                        ]
+                    },
+                    {
+                        title: "Implement Event Emitter",
+                        description: "Create a simple event emitter with on(), off(), and emit() methods. The 'on' method should register listeners, 'emit' should trigger them with data.",
+                        examples: [
+                            { input: 'emitter.on("event", callback); emitter.emit("event", data)', output: 'callback executed with data' }
+                        ],
+                        starterCode: {
+                            python: `class EventEmitter:
+    def __init__(self):
+        # Write your code here
+        pass
+    
+    def on(self, event, callback):
+        pass
+    
+    def emit(self, event, data):
+        pass`,
+                            javascript: `class EventEmitter {
+    constructor() {
+        // Write your code here
+    }
+    
+    on(event, callback) {
+        // Write your code here
+    }
+    
+    emit(event, data) {
+        // Write your code here
+    }
+}`
+                        },
+                        testCases: [
+                            { input: ['test'], expected: 'object' }
+                        ]
+                    },
+                    {
+                        title: "Flatten Nested Array",
+                        description: "Write a function that flattens a deeply nested array into a single-level array.",
+                        examples: [
+                            { input: '[1, [2, [3, 4], 5], 6]', output: '[1, 2, 3, 4, 5, 6]' }
+                        ],
+                        starterCode: {
+                            python: `def flatten_array(arr):
+    # Write your code here
+    pass`,
+                            javascript: `function flattenArray(arr) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[1, [2, [3, 4], 5], 6]], expected: [1, 2, 3, 4, 5, 6] },
+                            { input: [[[1], [2], [3]]], expected: [1, 2, 3] }
+                        ]
+                    },
+                    {
+                        title: "Implement Promise.all",
+                        description: "Create your own version of Promise.all that takes an array of promises and returns a promise that resolves when all input promises resolve.",
+                        examples: [
+                            { input: '[Promise.resolve(1), Promise.resolve(2)]', output: '[1, 2]' }
+                        ],
+                        starterCode: {
+                            python: `def promise_all(promises):
+    # Write your code here
+    pass`,
+                            javascript: `function promiseAll(promises) {
+    // Write your code here
+    // Return a promise that resolves with array of results
+}`
+                        },
+                        testCases: [
+                            { input: [[Promise.resolve(1), Promise.resolve(2)]], expected: 'object' }
+                        ]
+                    },
+                    {
+                        title: "Memoization Function",
+                        description: "Create a memoize function that caches the results of expensive function calls based on their arguments.",
+                        examples: [
+                            { input: 'const memoized = memoize(expensiveFunc); memoized(5) caches result', output: 'Cached result on subsequent calls' }
+                        ],
+                        starterCode: {
+                            python: `def memoize(func):
+    # Write your code here
+    pass`,
+                            javascript: `function memoize(func) {
+    // Write your code here
+    // Return a wrapper function that caches results
+}`
+                        },
+                        testCases: [
+                            { input: [(x) => x * 2], expected: 'function' }
+                        ]
+                    },
+                    {
+                        title: "Virtual DOM Diff",
+                        description: "Write a simple function that compares two object trees (simulating virtual DOM) and returns what changed. Return 'same', 'modified', or 'different'.",
+                        examples: [
+                            { input: '{type: "div", props: {id: 1}}, {type: "div", props: {id: 2}}', output: '"modified"' }
+                        ],
+                        starterCode: {
+                            python: `def vdom_diff(old_node, new_node):
+    # Write your code here
+    pass`,
+                            javascript: `function vdomDiff(oldNode, newNode) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [{type: 'div', props: {id: 1}}, {type: 'div', props: {id: 1}}], expected: 'same' }
+                        ]
+                    },
+                    {
+                        title: "Curry Function",
+                        description: "Create a curry function that transforms a function with multiple arguments into a sequence of functions each taking a single argument.",
+                        examples: [
+                            { input: 'curry(add)(1)(2)(3) where add = (a,b,c) => a+b+c', output: '6' }
+                        ],
+                        starterCode: {
+                            python: `def curry(func):
+    # Write your code here
+    pass`,
+                            javascript: `function curry(func) {
+    // Write your code here
+    // Return a curried version of the function
+}`
+                        },
+                        testCases: [
+                            { input: [(a, b, c) => a + b + c], expected: 'function' }
+                        ]
+                    },
+                    {
+                        title: "Infinite Scroll Detector",
+                        description: "Create a function that detects when a user has scrolled near the bottom. Takes scroll position, total height, and threshold (e.g., 100px from bottom).",
+                        examples: [
+                            { input: 'scrollPos = 900, totalHeight = 1000, threshold = 100', output: 'true' }
+                        ],
+                        starterCode: {
+                            python: `def is_near_bottom(scroll_pos, total_height, threshold):
+    # Write your code here
+    pass`,
+                            javascript: `function isNearBottom(scrollPos, totalHeight, threshold) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [900, 1000, 100], expected: true },
+                            { input: [500, 1000, 100], expected: false }
+                        ]
+                    },
+                    {
+                        title: "Template String Parser",
+                        description: "Write a function that parses template strings like 'Hello {{name}}, you are {{age}} years old' and replaces placeholders with values from an object.",
+                        examples: [
+                            { input: 'template = "Hello {{name}}", data = {name: "John"}', output: '"Hello John"' }
+                        ],
+                        starterCode: {
+                            python: `def parse_template(template, data):
+    # Write your code here
+    pass`,
+                            javascript: `function parseTemplate(template, data) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['Hello {{name}}', {name: 'John'}], expected: 'Hello John' },
+                            { input: ['{{greeting}} {{name}}!', {greeting: 'Hi', name: 'Alice'}], expected: 'Hi Alice!' }
+                        ]
+                    }
+                ]
+            },
+            backend: {
+                beginner: [
+                    {
+                        title: "Count Word Frequency",
+                        description: "Write a function that takes a string and returns an object/dictionary with each word as a key and its frequency as the value. Words are case-insensitive.",
+                        examples: [
+                            { input: '"hello world hello"', output: '{"hello": 2, "world": 1}' },
+                            { input: '"The the THE"', output: '{"the": 3}' }
+                        ],
+                        starterCode: {
+                            python: `def word_frequency(text):
+    # Write your code here
+    pass`,
+                            javascript: `function wordFrequency(text) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['hello world hello'], expected: {hello: 2, world: 1} },
+                            { input: ['The the THE'], expected: {the: 3} }
+                        ]
+                    },
+                    {
+                        title: "Filter by Property",
+                        description: "Write a function that takes an array of objects and a key-value pair, and returns only the objects that match that key-value pair.",
+                        examples: [
+                            { input: 'users = [{name: "Alice", age: 25}, {name: "Bob", age: 30}], key = "age", value = 25', output: '[{name: "Alice", age: 25}]' }
+                        ],
+                        starterCode: {
+                            python: `def filter_by_property(items, key, value):
+    # Write your code here
+    pass`,
+                            javascript: `function filterByProperty(items, key, value) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[{name: 'Alice', age: 25}, {name: 'Bob', age: 30}], 'age', 25], expected: [{name: 'Alice', age: 25}] },
+                            { input: [[{id: 1, active: true}, {id: 2, active: false}], 'active', true], expected: [{id: 1, active: true}] }
+                        ]
+                    },
+                    {
+                        title: "Validate Password Strength",
+                        description: "Write a function that checks if a password is strong. A strong password has: at least 8 characters, one uppercase letter, one lowercase letter, and one number.",
+                        examples: [
+                            { input: '"Password123"', output: 'true' },
+                            { input: '"weak"', output: 'false' }
+                        ],
+                        starterCode: {
+                            python: `def is_strong_password(password):
+    # Write your code here
+    pass`,
+                            javascript: `function isStrongPassword(password) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['Password123'], expected: true },
+                            { input: ['weak'], expected: false },
+                            { input: ['NoNumbers'], expected: false }
+                        ]
+                    },
+                    {
+                        title: "Parse JSON Safely",
+                        description: "Write a function that safely parses a JSON string. If parsing fails, return null instead of throwing an error.",
+                        examples: [
+                            { input: '"{\"name\":\"John\"}"', output: '{name: "John"}' },
+                            { input: '"invalid json"', output: 'null' }
+                        ],
+                        starterCode: {
+                            python: `def safe_parse_json(json_string):
+    # Write your code here
+    pass`,
+                            javascript: `function safeParseJSON(jsonString) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['{"name":"John"}'], expected: {name: 'John'} },
+                            { input: ['invalid json'], expected: null }
+                        ]
+                    },
+                    {
+                        title: "Generate Random ID",
+                        description: "Write a function that generates a random alphanumeric ID of a specified length.",
+                        examples: [
+                            { input: '8', output: '"a1b2c3d4" (random)' },
+                            { input: '4', output: '"x7y9" (random)' }
+                        ],
+                        starterCode: {
+                            python: `def generate_id(length):
+    # Write your code here
+    pass`,
+                            javascript: `function generateId(length) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [8], expected: 'string' },
+                            { input: [4], expected: 'string' }
+                        ]
+                    },
+                    {
+                        title: "Calculate Age from Birthdate",
+                        description: "Write a function that calculates age in years given a birthdate string in format 'YYYY-MM-DD' and today's date.",
+                        examples: [
+                            { input: 'birthdate = "2000-01-01", today = "2024-01-01"', output: '24' }
+                        ],
+                        starterCode: {
+                            python: `def calculate_age(birthdate, today):
+    # Write your code here
+    pass`,
+                            javascript: `function calculateAge(birthdate, today) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['2000-01-01', '2024-01-01'], expected: 24 },
+                            { input: ['1990-06-15', '2024-06-14'], expected: 33 }
+                        ]
+                    },
+                    {
+                        title: "Paginate Array",
+                        description: "Write a function that implements pagination. Given an array, page number, and page size, return the items for that page.",
+                        examples: [
+                            { input: 'items = [1,2,3,4,5,6], page = 2, pageSize = 2', output: '[3, 4]' }
+                        ],
+                        starterCode: {
+                            python: `def paginate(items, page, page_size):
+    # Write your code here
+    pass`,
+                            javascript: `function paginate(items, page, pageSize) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[1,2,3,4,5,6], 2, 2], expected: [3, 4] },
+                            { input: [[1,2,3,4,5], 1, 3], expected: [1, 2, 3] }
+                        ]
+                    },
+                    {
+                        title: "Validate URL Format",
+                        description: "Write a function that validates if a string is a properly formatted URL (must start with http:// or https://).",
+                        examples: [
+                            { input: '"https://example.com"', output: 'true' },
+                            { input: '"example.com"', output: 'false' }
+                        ],
+                        starterCode: {
+                            python: `def is_valid_url(url):
+    # Write your code here
+    pass`,
+                            javascript: `function isValidUrl(url) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: ['https://example.com'], expected: true },
+                            { input: ['http://test.org'], expected: true },
+                            { input: ['example.com'], expected: false }
+                        ]
+                    },
+                    {
+                        title: "Sort by Multiple Fields",
+                        description: "Write a function that sorts an array of objects by multiple fields. First by primary field, then by secondary field for ties.",
+                        examples: [
+                            { input: '[{name: "Bob", age: 30}, {name: "Alice", age: 30}], fields: ["age", "name"]', output: 'Sorted by age, then name' }
+                        ],
+                        starterCode: {
+                            python: `def sort_by_fields(items, fields):
+    # Write your code here
+    pass`,
+                            javascript: `function sortByFields(items, fields) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[{name: 'Bob', age: 30}, {name: 'Alice', age: 30}], ['age', 'name']], expected: [{name: 'Alice', age: 30}, {name: 'Bob', age: 30}] }
+                        ]
+                    },
+                    {
+                        title: "Check Rate Limit",
+                        description: "Write a function that simulates rate limiting. Given an array of request timestamps and a limit (max requests per minute), check if a new request should be allowed.",
+                        examples: [
+                            { input: 'requests = [1000, 2000, 3000], newRequest = 4000, limit = 3', output: 'true' }
+                        ],
+                        starterCode: {
+                            python: `def is_allowed(requests, new_request, limit):
+    # Write your code here
+    pass`,
+                            javascript: `function isAllowed(requests, newRequest, limit) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[1000, 2000, 3000], 4000, 3], expected: true },
+                            { input: [[59000, 59500, 60000], 60500, 3], expected: false }
+                        ]
+                    }
+                ],
+                mid: [
+                    {
+                        title: "Group By Property",
+                        description: "Write a function that groups an array of objects by a specified property. Return an object where keys are the unique values of that property, and values are arrays of objects with that property value.",
+                        examples: [
+                            { input: 'users = [{dept: "IT", name: "Alice"}, {dept: "HR", name: "Bob"}, {dept: "IT", name: "Charlie"}], property = "dept"', 
+                              output: '{IT: [{dept: "IT", name: "Alice"}, {dept: "IT", name: "Charlie"}], HR: [{dept: "HR", name: "Bob"}]}' }
+                        ],
+                        starterCode: {
+                            python: `def group_by(items, property):
+    # Write your code here
+    pass`,
+                            javascript: `function groupBy(items, property) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[{dept: 'IT', name: 'Alice'}, {dept: 'HR', name: 'Bob'}, {dept: 'IT', name: 'Charlie'}], 'dept'], 
+                              expected: {IT: [{dept: 'IT', name: 'Alice'}, {dept: 'IT', name: 'Charlie'}], HR: [{dept: 'HR', name: 'Bob'}]} }
+                        ]
+                    },
+                    {
+                        title: "LRU Cache Implementation",
+                        description: "Implement a Least Recently Used (LRU) cache with get and put methods. The cache should have a maximum capacity and evict the least recently used item when full.",
+                        examples: [
+                            { input: 'capacity = 2; put(1, "a"); put(2, "b"); get(1); put(3, "c")', output: 'Key 2 is evicted' }
+                        ],
+                        starterCode: {
+                            python: `class LRUCache:
+    def __init__(self, capacity):
+        # Write your code here
+        pass
+    
+    def get(self, key):
+        pass
+    
+    def put(self, key, value):
+        pass`,
+                            javascript: `class LRUCache {
+    constructor(capacity) {
+        // Write your code here
+    }
+    
+    get(key) {
+        // Write your code here
+    }
+    
+    put(key, value) {
+        // Write your code here
+    }
+}`
+                        },
+                        testCases: [
+                            { input: [2], expected: 'object' }
+                        ]
+                    },
+                    {
+                        title: "API Response Merger",
+                        description: "Write a function that merges multiple API response objects by a common key (like 'id'). Combine properties from all sources.",
+                        examples: [
+                            { input: 'responses = [[{id: 1, name: "Alice"}], [{id: 1, age: 25}]], key = "id"', output: '[{id: 1, name: "Alice", age: 25}]' }
+                        ],
+                        starterCode: {
+                            python: `def merge_responses(responses, key):
+    # Write your code here
+    pass`,
+                            javascript: `function mergeResponses(responses, key) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [[[{id: 1, name: 'Alice'}], [{id: 1, age: 25}]], 'id'], expected: [{id: 1, name: 'Alice', age: 25}] }
+                        ]
+                    },
+                    {
+                        title: "JWT Payload Decoder",
+                        description: "Write a function that decodes a JWT token and extracts the payload. JWT format: 'header.payload.signature'. Return the decoded payload object.",
+                        examples: [
+                            { input: 'Base64 encoded JWT token', output: 'Decoded payload object' }
+                        ],
+                        starterCode: {
+                            python: `def decode_jwt(token):
+    # Write your code here
+    pass`,
+                            javascript: `function decodeJWT(token) {
+    // Write your code here
+    // Hint: Use atob() for base64 decoding
+}`
+                        },
+                        testCases: [
+                            { input: ['header.eyJuYW1lIjoiSm9obiJ9.signature'], expected: {name: 'John'} }
+                        ]
+                    },
+                    {
+                        title: "Query Builder",
+                        description: "Create a simple SQL-like query builder. Implement where(), select(), and build() methods to construct query strings.",
+                        examples: [
+                            { input: 'query.select("name", "age").where("age > 18")', output: '"SELECT name, age WHERE age > 18"' }
+                        ],
+                        starterCode: {
+                            python: `class QueryBuilder:
+    def __init__(self):
+        # Write your code here
+        pass
+    
+    def select(self, *fields):
+        pass
+    
+    def where(self, condition):
+        pass
+    
+    def build(self):
+        pass`,
+                            javascript: `class QueryBuilder {
+    constructor() {
+        // Write your code here
+    }
+    
+    select(...fields) {
+        // Write your code here
+        return this;
+    }
+    
+    where(condition) {
+        // Write your code here
+        return this;
+    }
+    
+    build() {
+        // Write your code here
+    }
+}`
+                        },
+                        testCases: [
+                            { input: ['test'], expected: 'object' }
+                        ]
+                    },
+                    {
+                        title: "Rate Limiter with Sliding Window",
+                        description: "Implement a rate limiter using sliding window algorithm. Track requests in time windows and limit based on configurable thresholds.",
+                        examples: [
+                            { input: 'limit = 5 requests per 60 seconds', output: 'Allow or deny based on recent request count' }
+                        ],
+                        starterCode: {
+                            python: `class RateLimiter:
+    def __init__(self, max_requests, window_ms):
+        # Write your code here
+        pass
+    
+    def is_allowed(self, user_id, timestamp):
+        pass`,
+                            javascript: `class RateLimiter {
+    constructor(maxRequests, windowMs) {
+        // Write your code here
+    }
+    
+    isAllowed(userId, timestamp) {
+        // Write your code here
+    }
+}`
+                        },
+                        testCases: [
+                            { input: [5, 60000], expected: 'object' }
+                        ]
+                    },
+                    {
+                        title: "Data Validator",
+                        description: "Create a schema validator that checks if an object matches a schema definition. Schema defines required fields, types, and validation rules.",
+                        examples: [
+                            { input: 'schema = {name: "string", age: "number"}, data = {name: "John", age: 30}', output: 'true' }
+                        ],
+                        starterCode: {
+                            python: `def validate(data, schema):
+    # Write your code here
+    pass`,
+                            javascript: `function validate(data, schema) {
+    // Write your code here
+    // Return true if valid, false otherwise
+}`
+                        },
+                        testCases: [
+                            { input: [{name: 'John', age: 30}, {name: 'string', age: 'number'}], expected: true },
+                            { input: [{name: 'John', age: 'thirty'}, {name: 'string', age: 'number'}], expected: false }
+                        ]
+                    },
+                    {
+                        title: "Middleware Chain",
+                        description: "Implement a middleware chain pattern. Each middleware can process data and pass it to the next one or stop the chain.",
+                        examples: [
+                            { input: 'chain.use(middleware1).use(middleware2).execute(data)', output: 'Data processed through all middleware' }
+                        ],
+                        starterCode: {
+                            python: `class MiddlewareChain:
+    def __init__(self):
+        # Write your code here
+        pass
+    
+    def use(self, middleware):
+        pass
+    
+    def execute(self, data):
+        pass`,
+                            javascript: `class MiddlewareChain {
+    constructor() {
+        // Write your code here
+    }
+    
+    use(middleware) {
+        // Write your code here
+        return this;
+    }
+    
+    execute(data) {
+        // Write your code here
+    }
+}`
+                        },
+                        testCases: [
+                            { input: ['test'], expected: 'object' }
+                        ]
+                    },
+                    {
+                        title: "Retry with Exponential Backoff",
+                        description: "Implement a retry mechanism with exponential backoff. Retry failed operations with increasing delays between attempts.",
+                        examples: [
+                            { input: 'maxRetries = 3, baseDelay = 1000', output: 'Retries with delays: 1s, 2s, 4s' }
+                        ],
+                        starterCode: {
+                            python: `def retry_with_backoff(func, max_retries, base_delay):
+    # Write your code here
+    pass`,
+                            javascript: `async function retryWithBackoff(func, maxRetries, baseDelay) {
+    // Write your code here
+    // Return the result or throw after all retries fail
+}`
+                        },
+                        testCases: [
+                            { input: [() => Promise.resolve('success'), 3, 1000], expected: 'object' }
+                        ]
+                    },
+                    {
+                        title: "Circular Reference Detector",
+                        description: "Write a function that detects circular references in objects. Return true if a circular reference exists, false otherwise.",
+                        examples: [
+                            { input: 'obj.child = obj (circular)', output: 'true' },
+                            { input: 'No circular references', output: 'false' }
+                        ],
+                        starterCode: {
+                            python: `def has_circular_reference(obj, seen=None):
+    # Write your code here
+    pass`,
+                            javascript: `function hasCircularReference(obj, seen = new Set()) {
+    // Write your code here
+}`
+                        },
+                        testCases: [
+                            { input: [{a: 1, b: {c: 2}}], expected: false }
+                        ]
+                    }
+                ]
+            },
+            situational: {
+                beginner: [
+                    {
+                        title: "What is Version Control?",
+                        description: "Explain what version control is and why it's important in software development. Provide at least 3 benefits.",
+                        examples: [
+                            { input: 'Concept explanation', output: 'Your understanding of version control' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Version Control:
+Write your explanation here...
+
+Benefits:
+1. 
+2. 
+3. 
+"""`,
+                            javascript: `/*
+Version Control:
+Write your explanation here...
+
+Benefits:
+1. 
+2. 
+3. 
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What is the DOM?",
+                        description: "Explain what the Document Object Model (DOM) is and how it relates to web development.",
+                        examples: [
+                            { input: 'Technical concept', output: 'Your explanation of the DOM' }
+                        ],
+                        starterCode: {
+                            python: `"""
+DOM (Document Object Model):
+Write your explanation here...
+
+Key points:
+- 
+- 
+- 
+"""`,
+                            javascript: `/*
+DOM (Document Object Model):
+Write your explanation here...
+
+Key points:
+- 
+- 
+- 
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Debugging Scenario: Application Crashes on Startup",
+                        description: "Your application crashes immediately after starting. Walk through your debugging process step by step. What would you check first? What tools would you use?",
+                        examples: [
+                            { input: 'Debugging scenario', output: 'Your systematic approach to solving the issue' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Debugging Steps:
+
+1. First, I would...
+
+2. Then I would check...
+
+3. Tools I would use:
+   - 
+   - 
+
+4. Common causes to investigate:
+   - 
+   - 
+"""`,
+                            javascript: `/*
+Debugging Steps:
+
+1. First, I would...
+
+2. Then I would check...
+
+3. Tools I would use:
+   - 
+   - 
+
+4. Common causes to investigate:
+   - 
+   - 
+*/`
+                        },
+                        testCases: [
+                            { input: ['scenario'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What is an API?",
+                        description: "Explain what an API (Application Programming Interface) is, provide a real-world analogy, and give an example of when you might use one.",
+                        examples: [
+                            { input: 'Technical term', output: 'Your explanation with analogy and example' }
+                        ],
+                        starterCode: {
+                            python: `"""
+API Explanation:
+
+
+Real-world analogy:
+
+
+Example use case:
+
+
+"""`,
+                            javascript: `/*
+API Explanation:
+
+
+Real-world analogy:
+
+
+Example use case:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Explain REST vs SOAP",
+                        description: "Compare and contrast REST and SOAP. When would you choose one over the other?",
+                        examples: [
+                            { input: 'Technical comparison', output: 'Your analysis of both approaches' }
+                        ],
+                        starterCode: {
+                            python: `"""
+REST:
+Characteristics:
+- 
+- 
+
+SOAP:
+Characteristics:
+- 
+- 
+
+Key Differences:
+
+
+When to use REST:
+
+
+When to use SOAP:
+
+
+"""`,
+                            javascript: `/*
+REST:
+Characteristics:
+- 
+- 
+
+SOAP:
+Characteristics:
+- 
+- 
+
+Key Differences:
+
+
+When to use REST:
+
+
+When to use SOAP:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Code Review Scenario",
+                        description: "You're reviewing a colleague's code and notice they've hard-coded API credentials in the source code. How would you address this? What best practices would you suggest?",
+                        examples: [
+                            { input: 'Professional scenario', output: 'Your diplomatic approach and technical solution' }
+                        ],
+                        starterCode: {
+                            python: `"""
+How I would address this:
+
+
+Why this is a problem:
+
+
+Best practices to suggest:
+1. 
+2. 
+3. 
+
+
+Alternative solutions:
+
+
+"""`,
+                            javascript: `/*
+How I would address this:
+
+
+Why this is a problem:
+
+
+Best practices to suggest:
+1. 
+2. 
+3. 
+
+
+Alternative solutions:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['scenario'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What is HTTP vs HTTPS?",
+                        description: "Explain the difference between HTTP and HTTPS. Why is HTTPS important?",
+                        examples: [
+                            { input: 'Technical concept', output: 'Your explanation of both protocols' }
+                        ],
+                        starterCode: {
+                            python: `"""
+HTTP:
+
+
+HTTPS:
+
+
+Key differences:
+
+
+Why HTTPS matters:
+
+
+"""`,
+                            javascript: `/*
+HTTP:
+
+
+HTTPS:
+
+
+Key differences:
+
+
+Why HTTPS matters:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Database: SQL vs NoSQL",
+                        description: "Explain the difference between SQL and NoSQL databases. Give examples of when you'd use each.",
+                        examples: [
+                            { input: 'Database concepts', output: 'Your comparison and use cases' }
+                        ],
+                        starterCode: {
+                            python: `"""
+SQL Databases:
+Characteristics:
+
+
+Examples:
+
+
+Best for:
+
+
+NoSQL Databases:
+Characteristics:
+
+
+Examples:
+
+
+Best for:
+
+
+"""`,
+                            javascript: `/*
+SQL Databases:
+Characteristics:
+
+
+Examples:
+
+
+Best for:
+
+
+NoSQL Databases:
+Characteristics:
+
+
+Examples:
+
+
+Best for:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Team Conflict: Different Technical Approaches",
+                        description: "Your team is split between two different approaches to solve a problem. Half wants to use approach A, half wants approach B. How do you facilitate a decision?",
+                        examples: [
+                            { input: 'Team scenario', output: 'Your conflict resolution strategy' }
+                        ],
+                        starterCode: {
+                            python: `"""
+My approach to resolving this:
+
+1. 
+
+2. 
+
+3. 
+
+Criteria for evaluation:
+- 
+- 
+- 
+
+How I would facilitate the discussion:
+
+
+"""`,
+                            javascript: `/*
+My approach to resolving this:
+
+1. 
+
+2. 
+
+3. 
+
+Criteria for evaluation:
+- 
+- 
+- 
+
+How I would facilitate the discussion:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['scenario'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What is Git and GitHub?",
+                        description: "Explain what Git is, what GitHub is, and how they differ. Describe a basic Git workflow.",
+                        examples: [
+                            { input: 'Technical tools', output: 'Your explanation of both and their relationship' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Git:
+
+
+GitHub:
+
+
+The difference:
+
+
+Basic Git workflow:
+1. 
+2. 
+3. 
+4. 
+5. 
+
+"""`,
+                            javascript: `/*
+Git:
+
+
+GitHub:
+
+
+The difference:
+
+
+Basic Git workflow:
+1. 
+2. 
+3. 
+4. 
+5. 
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What is Agile Methodology?",
+                        description: "Explain Agile development methodology. What are sprints, stand-ups, and retrospectives? How does it differ from Waterfall?",
+                        examples: [
+                            { input: 'Development methodology', output: 'Your explanation of Agile practices' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Agile Methodology:
+
+
+Key Principles:
+1. 
+2. 
+3. 
+
+Sprints:
+
+
+Daily Stand-ups:
+
+
+Retrospectives:
+
+
+Agile vs Waterfall:
+
+
+Benefits of Agile:
+- 
+- 
+- 
+
+"""`,
+                            javascript: `/*
+Agile Methodology:
+
+
+Key Principles:
+1. 
+2. 
+3. 
+
+Sprints:
+
+
+Daily Stand-ups:
+
+
+Retrospectives:
+
+
+Agile vs Waterfall:
+
+
+Benefits of Agile:
+- 
+- 
+- 
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What is Object-Oriented Programming (OOP)?",
+                        description: "Explain the four pillars of OOP: Encapsulation, Abstraction, Inheritance, and Polymorphism. Provide examples for each.",
+                        examples: [
+                            { input: 'Programming paradigm', output: 'Your explanation with examples' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Object-Oriented Programming:
+
+
+1. Encapsulation:
+   Definition:
+   
+   Example:
+   
+
+2. Abstraction:
+   Definition:
+   
+   Example:
+   
+
+3. Inheritance:
+   Definition:
+   
+   Example:
+   
+
+4. Polymorphism:
+   Definition:
+   
+   Example:
+   
+
+Benefits of OOP:
+- 
+- 
+- 
+
+"""`,
+                            javascript: `/*
+Object-Oriented Programming:
+
+
+1. Encapsulation:
+   Definition:
+   
+   Example:
+   
+
+2. Abstraction:
+   Definition:
+   
+   Example:
+   
+
+3. Inheritance:
+   Definition:
+   
+   Example:
+   
+
+4. Polymorphism:
+   Definition:
+   
+   Example:
+   
+
+Benefits of OOP:
+- 
+- 
+- 
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What is the Software Development Life Cycle (SDLC)?",
+                        description: "Describe the phases of SDLC and what happens in each phase.",
+                        examples: [
+                            { input: 'Development process', output: 'Your explanation of each SDLC phase' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Software Development Life Cycle (SDLC):
+
+1. Planning:
+   - 
+   - 
+
+2. Requirements Analysis:
+   - 
+   - 
+
+3. Design:
+   - 
+   - 
+
+4. Development/Implementation:
+   - 
+   - 
+
+5. Testing:
+   - 
+   - 
+
+6. Deployment:
+   - 
+   - 
+
+7. Maintenance:
+   - 
+   - 
+
+Why SDLC is important:
+
+
+"""`,
+                            javascript: `/*
+Software Development Life Cycle (SDLC):
+
+1. Planning:
+   - 
+   - 
+
+2. Requirements Analysis:
+   - 
+   - 
+
+3. Design:
+   - 
+   - 
+
+4. Development/Implementation:
+   - 
+   - 
+
+5. Testing:
+   - 
+   - 
+
+6. Deployment:
+   - 
+   - 
+
+7. Maintenance:
+   - 
+   - 
+
+Why SDLC is important:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What is Docker and Containerization?",
+                        description: "Explain what Docker is, what containers are, and how they differ from virtual machines. Why use containerization?",
+                        examples: [
+                            { input: 'DevOps technology', output: 'Your explanation of Docker and containers' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Docker:
+
+
+Containers:
+
+
+Containers vs Virtual Machines:
+
+Containers:
+- 
+- 
+
+Virtual Machines:
+- 
+- 
+
+Key Differences:
+
+
+Benefits of Containerization:
+1. 
+2. 
+3. 
+4. 
+
+Common Use Cases:
+- 
+- 
+- 
+
+"""`,
+                            javascript: `/*
+Docker:
+
+
+Containers:
+
+
+Containers vs Virtual Machines:
+
+Containers:
+- 
+- 
+
+Virtual Machines:
+- 
+- 
+
+Key Differences:
+
+
+Benefits of Containerization:
+1. 
+2. 
+3. 
+4. 
+
+Common Use Cases:
+- 
+- 
+- 
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What is Test-Driven Development (TDD)?",
+                        description: "Explain the TDD process and its benefits. What is the Red-Green-Refactor cycle?",
+                        examples: [
+                            { input: 'Development practice', output: 'Your explanation of TDD methodology' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Test-Driven Development (TDD):
+
+
+The TDD Process:
+
+1. Red:
+   
+
+2. Green:
+   
+
+3. Refactor:
+   
+
+Benefits of TDD:
+- 
+- 
+- 
+- 
+
+Challenges:
+- 
+- 
+
+Types of Tests:
+- Unit Tests:
+- Integration Tests:
+- End-to-End Tests:
+
+When to use TDD:
+
+
+"""`,
+                            javascript: `/*
+Test-Driven Development (TDD):
+
+
+The TDD Process:
+
+1. Red:
+   
+
+2. Green:
+   
+
+3. Refactor:
+   
+
+Benefits of TDD:
+- 
+- 
+- 
+- 
+
+Challenges:
+- 
+- 
+
+Types of Tests:
+- Unit Tests:
+- Integration Tests:
+- End-to-End Tests:
+
+When to use TDD:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What is Asynchronous Programming?",
+                        description: "Explain synchronous vs asynchronous programming. What are callbacks, promises, and async/await?",
+                        examples: [
+                            { input: 'Programming concept', output: 'Your explanation with examples' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Synchronous Programming:
+
+
+Asynchronous Programming:
+
+
+Why Async is Important:
+- 
+- 
+
+JavaScript Async Patterns:
+
+1. Callbacks:
+   Example:
+   
+   Problems (Callback Hell):
+   
+
+2. Promises:
+   Example:
+   
+   Benefits:
+   
+
+3. Async/Await:
+   Example:
+   
+   Benefits:
+   
+
+Use Cases:
+- 
+- 
+- 
+
+"""`,
+                            javascript: `/*
+Synchronous Programming:
+
+
+Asynchronous Programming:
+
+
+Why Async is Important:
+- 
+- 
+
+JavaScript Async Patterns:
+
+1. Callbacks:
+   Example:
+   
+   Problems (Callback Hell):
+   
+
+2. Promises:
+   Example:
+   
+   Benefits:
+   
+
+3. Async/Await:
+   Example:
+   
+   Benefits:
+   
+
+Use Cases:
+- 
+- 
+- 
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What is MVC Architecture?",
+                        description: "Explain the Model-View-Controller pattern. What is the responsibility of each component?",
+                        examples: [
+                            { input: 'Design pattern', output: 'Your explanation of MVC' }
+                        ],
+                        starterCode: {
+                            python: `"""
+MVC (Model-View-Controller):
+
+
+Model:
+Responsibility:
+
+Example:
+
+
+View:
+Responsibility:
+
+Example:
+
+
+Controller:
+Responsibility:
+
+Example:
+
+
+How They Work Together:
+
+
+Benefits of MVC:
+1. 
+2. 
+3. 
+
+Frameworks Using MVC:
+- 
+- 
+- 
+
+"""`,
+                            javascript: `/*
+MVC (Model-View-Controller):
+
+
+Model:
+Responsibility:
+
+Example:
+
+
+View:
+Responsibility:
+
+Example:
+
+
+Controller:
+Responsibility:
+
+Example:
+
+
+How They Work Together:
+
+
+Benefits of MVC:
+1. 
+2. 
+3. 
+
+Frameworks Using MVC:
+- 
+- 
+- 
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What is OAuth and JWT?",
+                        description: "Explain OAuth 2.0 authentication flow and JSON Web Tokens. When would you use each?",
+                        examples: [
+                            { input: 'Authentication concepts', output: 'Your explanation of both technologies' }
+                        ],
+                        starterCode: {
+                            python: `"""
+OAuth 2.0:
+What it is:
+
+
+How it works:
+1. 
+2. 
+3. 
+4. 
+
+Use cases:
+- 
+- 
+
+
+JWT (JSON Web Token):
+What it is:
+
+
+Structure:
+- Header:
+- Payload:
+- Signature:
+
+How it works:
+
+
+Use cases:
+- 
+- 
+
+OAuth vs JWT:
+
+
+Security Considerations:
+- 
+- 
+- 
+
+"""`,
+                            javascript: `/*
+OAuth 2.0:
+What it is:
+
+
+How it works:
+1. 
+2. 
+3. 
+4. 
+
+Use cases:
+- 
+- 
+
+
+JWT (JSON Web Token):
+What it is:
+
+
+Structure:
+- Header:
+- Payload:
+- Signature:
+
+How it works:
+
+
+Use cases:
+- 
+- 
+
+OAuth vs JWT:
+
+
+Security Considerations:
+- 
+- 
+- 
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What is Big O Notation?",
+                        description: "Explain Big O notation and time complexity. Describe common complexities with examples: O(1), O(n), O(n²), O(log n).",
+                        examples: [
+                            { input: 'Algorithm complexity', output: 'Your explanation with examples' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Big O Notation:
+What it measures:
+
+
+Common Time Complexities (from fastest to slowest):
+
+1. O(1) - Constant:
+   Example:
+   
+
+2. O(log n) - Logarithmic:
+   Example:
+   
+
+3. O(n) - Linear:
+   Example:
+   
+
+4. O(n log n) - Linearithmic:
+   Example:
+   
+
+5. O(n²) - Quadratic:
+   Example:
+   
+
+6. O(2^n) - Exponential:
+   Example:
+   
+
+Why Big O Matters:
+
+
+Space Complexity:
+
+
+"""`,
+                            javascript: `/*
+Big O Notation:
+What it measures:
+
+
+Common Time Complexities (from fastest to slowest):
+
+1. O(1) - Constant:
+   Example:
+   
+
+2. O(log n) - Logarithmic:
+   Example:
+   
+
+3. O(n) - Linear:
+   Example:
+   
+
+4. O(n log n) - Linearithmic:
+   Example:
+   
+
+5. O(n²) - Quadratic:
+   Example:
+   
+
+6. O(2^n) - Exponential:
+   Example:
+   
+
+Why Big O Matters:
+
+
+Space Complexity:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    }
+                ],
+                mid: [
+                    {
+                        title: "System Design: Build a URL Shortener",
+                        description: "Design a URL shortening service like bit.ly. Explain your architecture, database schema, and how you'd handle scaling to millions of users.",
+                        examples: [
+                            { input: 'System design', output: 'Your complete architecture design' }
+                        ],
+                        starterCode: {
+                            python: `"""
+System Architecture:
+
+
+Database Schema:
+
+
+Core Components:
+1. 
+2. 
+3. 
+
+Scaling Considerations:
+- 
+- 
+- 
+
+Potential Challenges:
+- 
+- 
+
+How I'd handle them:
+
+
+"""`,
+                            javascript: `/*
+System Architecture:
+
+
+Database Schema:
+
+
+Core Components:
+1. 
+2. 
+3. 
+
+Scaling Considerations:
+- 
+- 
+- 
+
+Potential Challenges:
+- 
+- 
+
+How I'd handle them:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['design'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Microservices vs Monolithic Architecture",
+                        description: "Compare microservices and monolithic architectures. Discuss pros/cons of each and when you'd choose one over the other.",
+                        examples: [
+                            { input: 'Architecture concepts', output: 'Your detailed comparison' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Monolithic Architecture:
+Pros:
+- 
+- 
+
+Cons:
+- 
+- 
+
+Microservices Architecture:
+Pros:
+- 
+- 
+
+Cons:
+- 
+- 
+
+When to use Monolithic:
+
+
+When to use Microservices:
+
+
+Migration considerations:
+
+
+"""`,
+                            javascript: `/*
+Monolithic Architecture:
+Pros:
+- 
+- 
+
+Cons:
+- 
+- 
+
+Microservices Architecture:
+Pros:
+- 
+- 
+
+Cons:
+- 
+- 
+
+When to use Monolithic:
+
+
+When to use Microservices:
+
+
+Migration considerations:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Production Outage Scenario",
+                        description: "Your production application goes down at 2 AM. Users can't access the service. Walk through your incident response process from detection to resolution to post-mortem.",
+                        examples: [
+                            { input: 'Critical incident', output: 'Your complete incident response plan' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Immediate Response (First 5 minutes):
+1. 
+2. 
+3. 
+
+Investigation Process:
+- 
+- 
+- 
+
+Communication Plan:
+- Who to notify:
+- What to communicate:
+- How to communicate:
+
+Resolution Steps:
+
+
+Post-Incident:
+- Root cause analysis:
+- Preventive measures:
+- Documentation:
+
+"""`,
+                            javascript: `/*
+Immediate Response (First 5 minutes):
+1. 
+2. 
+3. 
+
+Investigation Process:
+- 
+- 
+- 
+
+Communication Plan:
+- Who to notify:
+- What to communicate:
+- How to communicate:
+
+Resolution Steps:
+
+
+Post-Incident:
+- Root cause analysis:
+- Preventive measures:
+- Documentation:
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['scenario'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "CI/CD Pipeline Design",
+                        description: "Design a complete CI/CD pipeline for a web application. Include stages, tools, and quality gates.",
+                        examples: [
+                            { input: 'DevOps design', output: 'Your CI/CD architecture' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Pipeline Stages:
+
+1. Source Control:
+   - 
+
+2. Build:
+   - 
+
+3. Test:
+   - Unit tests
+   - Integration tests
+   - 
+
+4. Quality Gates:
+   - 
+   - 
+
+5. Deploy:
+   - Staging:
+   - Production:
+
+Tools & Technologies:
+- 
+- 
+- 
+
+Rollback Strategy:
+
+
+Monitoring & Alerts:
+
+
+"""`,
+                            javascript: `/*
+Pipeline Stages:
+
+1. Source Control:
+   - 
+
+2. Build:
+   - 
+
+3. Test:
+   - Unit tests
+   - Integration tests
+   - 
+
+4. Quality Gates:
+   - 
+   - 
+
+5. Deploy:
+   - Staging:
+   - Production:
+
+Tools & Technologies:
+- 
+- 
+- 
+
+Rollback Strategy:
+
+
+Monitoring & Alerts:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['design'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Database Optimization Problem",
+                        description: "A critical query in your application is taking 30 seconds to execute and slowing down the entire system. Walk through how you'd optimize it.",
+                        examples: [
+                            { input: 'Performance issue', output: 'Your optimization strategy' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Investigation Steps:
+1. 
+2. 
+3. 
+
+Analysis Tools:
+- 
+- 
+
+Common Issues to Check:
+- Missing indexes
+- N+1 queries
+- 
+- 
+
+Optimization Techniques:
+1. 
+2. 
+3. 
+
+Testing Plan:
+
+
+Monitoring After Changes:
+
+
+"""`,
+                            javascript: `/*
+Investigation Steps:
+1. 
+2. 
+3. 
+
+Analysis Tools:
+- 
+- 
+
+Common Issues to Check:
+- Missing indexes
+- N+1 queries
+- 
+- 
+
+Optimization Techniques:
+1. 
+2. 
+3. 
+
+Testing Plan:
+
+
+Monitoring After Changes:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['scenario'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Security: Authentication vs Authorization",
+                        description: "Explain authentication vs authorization. Design a secure authentication system including password storage, session management, and common attack prevention.",
+                        examples: [
+                            { input: 'Security concepts', output: 'Your security design and explanation' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Authentication:
+Definition:
+How it works:
+
+
+Authorization:
+Definition:
+How it works:
+
+
+Secure Password Storage:
+- Hashing algorithm:
+- Salt:
+- 
+
+Session Management:
+- 
+- 
+
+Security Measures:
+1. Prevent SQL Injection:
+2. Prevent XSS:
+3. Prevent CSRF:
+4. Rate Limiting:
+5. 
+
+Best Practices:
+- 
+- 
+- 
+
+"""`,
+                            javascript: `/*
+Authentication:
+Definition:
+How it works:
+
+
+Authorization:
+Definition:
+How it works:
+
+
+Secure Password Storage:
+- Hashing algorithm:
+- Salt:
+- 
+
+Session Management:
+- 
+- 
+
+Security Measures:
+1. Prevent SQL Injection:
+2. Prevent XSS:
+3. Prevent CSRF:
+4. Rate Limiting:
+5. 
+
+Best Practices:
+- 
+- 
+- 
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['concept'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Load Balancing Strategy",
+                        description: "Explain different load balancing algorithms and when to use each. Design a load balancing strategy for a high-traffic application.",
+                        examples: [
+                            { input: 'Infrastructure design', output: 'Your load balancing architecture' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Load Balancing Algorithms:
+
+1. Round Robin:
+   - How it works:
+   - Best for:
+   - Limitations:
+
+2. Least Connections:
+   - How it works:
+   - Best for:
+
+3. IP Hash:
+   - How it works:
+   - Best for:
+
+4. Weighted:
+   - How it works:
+   - Best for:
+
+My Design for High-Traffic App:
+
+Architecture:
+
+
+Health Checks:
+
+
+Scaling Strategy:
+
+
+Failover Plan:
+
+
+"""`,
+                            javascript: `/*
+Load Balancing Algorithms:
+
+1. Round Robin:
+   - How it works:
+   - Best for:
+   - Limitations:
+
+2. Least Connections:
+   - How it works:
+   - Best for:
+
+3. IP Hash:
+   - How it works:
+   - Best for:
+
+4. Weighted:
+   - How it works:
+   - Best for:
+
+My Design for High-Traffic App:
+
+Architecture:
+
+
+Health Checks:
+
+
+Scaling Strategy:
+
+
+Failover Plan:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['design'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Legacy Code Migration",
+                        description: "You need to migrate a 10-year-old monolithic application to a modern architecture without downtime. What's your strategy?",
+                        examples: [
+                            { input: 'Migration project', output: 'Your phased migration plan' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Assessment Phase:
+1. 
+2. 
+3. 
+
+Migration Strategy:
+
+Phase 1 (Months 1-3):
+
+
+Phase 2 (Months 4-6):
+
+
+Phase 3 (Months 7-9):
+
+
+Risk Mitigation:
+- 
+- 
+- 
+
+Testing Strategy:
+
+
+Rollback Plan:
+
+
+Success Metrics:
+
+
+Team & Communication:
+
+
+"""`,
+                            javascript: `/*
+Assessment Phase:
+1. 
+2. 
+3. 
+
+Migration Strategy:
+
+Phase 1 (Months 1-3):
+
+
+Phase 2 (Months 4-6):
+
+
+Phase 3 (Months 7-9):
+
+
+Risk Mitigation:
+- 
+- 
+- 
+
+Testing Strategy:
+
+
+Rollback Plan:
+
+
+Success Metrics:
+
+
+Team & Communication:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['scenario'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Caching Strategy Design",
+                        description: "Design a comprehensive caching strategy for an e-commerce application. Consider different cache layers and invalidation strategies.",
+                        examples: [
+                            { input: 'Performance optimization', output: 'Your multi-layer caching architecture' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Cache Layers:
+
+1. Browser/Client Cache:
+   - What to cache:
+   - Duration:
+
+2. CDN Cache:
+   - What to cache:
+   - Invalidation:
+
+3. Application Cache (Redis/Memcached):
+   - What to cache:
+   - TTL strategy:
+
+4. Database Query Cache:
+   - What to cache:
+   - Invalidation triggers:
+
+Cache Invalidation Strategies:
+1. 
+2. 
+3. 
+
+Cache Warming:
+
+
+Handling Cache Stampede:
+
+
+Monitoring & Metrics:
+- Cache hit rate
+- 
+- 
+
+"""`,
+                            javascript: `/*
+Cache Layers:
+
+1. Browser/Client Cache:
+   - What to cache:
+   - Duration:
+
+2. CDN Cache:
+   - What to cache:
+   - Invalidation:
+
+3. Application Cache (Redis/Memcached):
+   - What to cache:
+   - TTL strategy:
+
+4. Database Query Cache:
+   - What to cache:
+   - Invalidation triggers:
+
+Cache Invalidation Strategies:
+1. 
+2. 
+3. 
+
+Cache Warming:
+
+
+Handling Cache Stampede:
+
+
+Monitoring & Metrics:
+- Cache hit rate
+- 
+- 
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['design'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Technical Debt Management",
+                        description: "Your codebase has accumulated significant technical debt. How do you balance new feature development with addressing technical debt? Create a strategy.",
+                        examples: [
+                            { input: 'Project management', output: 'Your technical debt reduction plan' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Assessment:
+1. Identify and categorize technical debt:
+   - Critical (blocking progress):
+   - High impact:
+   - Low hanging fruit:
+
+2. Quantify the impact:
+   - Development velocity:
+   - Bug frequency:
+   - 
+
+Strategy:
+
+Short-term (Next Sprint):
+
+
+Medium-term (Next Quarter):
+
+
+Long-term (Next Year):
+
+
+The 20% Rule:
+
+
+Metrics to Track:
+- 
+- 
+- 
+
+Stakeholder Communication:
+
+
+Prevention Going Forward:
+
+
+"""`,
+                            javascript: `/*
+Assessment:
+1. Identify and categorize technical debt:
+   - Critical (blocking progress):
+   - High impact:
+   - Low hanging fruit:
+
+2. Quantify the impact:
+   - Development velocity:
+   - Bug frequency:
+   - 
+
+Strategy:
+
+Short-term (Next Sprint):
+
+
+Medium-term (Next Quarter):
+
+
+Long-term (Next Year):
+
+
+The 20% Rule:
+
+
+Metrics to Track:
+- 
+- 
+- 
+
+Stakeholder Communication:
+
+
+Prevention Going Forward:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['scenario'], expected: 'text-answer' }
+                        ]
+                    }
+                ]
+            },
+            behavioral: {
+                beginner: [
+                    {
+                        title: "Tell Me About Yourself",
+                        description: "Craft a professional introduction. Include your background, current skills, what you're passionate about, and what you're looking for in your next role. Keep it concise (2-3 minutes).",
+                        examples: [
+                            { input: 'Professional introduction', output: 'Your elevator pitch' }
+                        ],
+                        starterCode: {
+                            python: `"""
+My Introduction:
+
+Background:
+
+
+Current Skills & Experience:
+
+
+What I'm Passionate About:
+
+
+What I'm Looking For:
+
+
+Why This Role Interests Me:
+
+
+"""`,
+                            javascript: `/*
+My Introduction:
+
+Background:
+
+
+Current Skills & Experience:
+
+
+What I'm Passionate About:
+
+
+What I'm Looking For:
+
+
+Why This Role Interests Me:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Why Do You Want to Work Here?",
+                        description: "Research a company and explain why you want to work there. Show genuine interest beyond just 'it's a good company.' Connect your goals with their mission.",
+                        examples: [
+                            { input: 'Company interest', output: 'Your compelling reason' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Company: [Insert company name]
+
+What I Know About the Company:
+- 
+- 
+- 
+
+Why I'm Interested:
+
+
+How My Skills Align:
+
+
+What I Can Contribute:
+
+
+Long-term Vision:
+
+
+"""`,
+                            javascript: `/*
+Company: [Insert company name]
+
+What I Know About the Company:
+- 
+- 
+- 
+
+Why I'm Interested:
+
+
+How My Skills Align:
+
+
+What I Can Contribute:
+
+
+Long-term Vision:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Describe a Time You Fixed a Bug",
+                        description: "Tell a story about debugging a challenging issue. Use the STAR method: Situation, Task, Action, Result.",
+                        examples: [
+                            { input: 'Problem-solving story', output: 'Your STAR format response' }
+                        ],
+                        starterCode: {
+                            python: `"""
+SITUATION:
+What was the context? What was the bug?
+
+
+TASK:
+What was your responsibility?
+
+
+ACTION:
+What steps did you take?
+1. 
+2. 
+3. 
+4. 
+
+Tools/Techniques Used:
+- 
+- 
+
+RESULT:
+What was the outcome?
+
+
+What I Learned:
+
+
+"""`,
+                            javascript: `/*
+SITUATION:
+What was the context? What was the bug?
+
+
+TASK:
+What was your responsibility?
+
+
+ACTION:
+What steps did you take?
+1. 
+2. 
+3. 
+4. 
+
+Tools/Techniques Used:
+- 
+- 
+
+RESULT:
+What was the outcome?
+
+
+What I Learned:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "How Do You Handle Tight Deadlines?",
+                        description: "Describe your approach to working under pressure. Give a specific example.",
+                        examples: [
+                            { input: 'Time management', output: 'Your strategy and example' }
+                        ],
+                        starterCode: {
+                            python: `"""
+My Approach to Tight Deadlines:
+
+1. Prioritization:
+
+
+2. Communication:
+
+
+3. Focus Techniques:
+
+
+Specific Example:
+
+SITUATION:
+
+
+My Strategy:
+
+
+Challenges Faced:
+
+
+Outcome:
+
+
+What I Learned:
+
+
+"""`,
+                            javascript: `/*
+My Approach to Tight Deadlines:
+
+1. Prioritization:
+
+
+2. Communication:
+
+
+3. Focus Techniques:
+
+
+Specific Example:
+
+SITUATION:
+
+
+My Strategy:
+
+
+Challenges Faced:
+
+
+Outcome:
+
+
+What I Learned:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Describe a Project You're Proud Of",
+                        description: "Share a project that showcases your skills. Explain the problem, your solution, technologies used, and the impact.",
+                        examples: [
+                            { input: 'Achievement story', output: 'Your project showcase' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Project Name:
+
+
+The Problem:
+
+
+My Role:
+
+
+Technologies Used:
+- 
+- 
+- 
+
+My Solution/Approach:
+
+
+Challenges Overcome:
+
+
+Results/Impact:
+- 
+- 
+
+What Made It Special:
+
+
+Skills Demonstrated:
+
+
+"""`,
+                            javascript: `/*
+Project Name:
+
+
+The Problem:
+
+
+My Role:
+
+
+Technologies Used:
+- 
+- 
+- 
+
+My Solution/Approach:
+
+
+Challenges Overcome:
+
+
+Results/Impact:
+- 
+- 
+
+What Made It Special:
+
+
+Skills Demonstrated:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "How Do You Learn New Technologies?",
+                        description: "Explain your learning process. Give a recent example of a new technology you learned.",
+                        examples: [
+                            { input: 'Learning approach', output: 'Your learning methodology' }
+                        ],
+                        starterCode: {
+                            python: `"""
+My Learning Process:
+
+1. 
+
+2. 
+
+3. 
+
+4. 
+
+
+Resources I Use:
+- 
+- 
+- 
+
+Recent Example:
+Technology Learned:
+
+
+Why I Needed It:
+
+
+How I Learned It:
+
+
+How I Applied It:
+
+
+Challenges:
+
+
+"""`,
+                            javascript: `/*
+My Learning Process:
+
+1. 
+
+2. 
+
+3. 
+
+4. 
+
+
+Resources I Use:
+- 
+- 
+- 
+
+Recent Example:
+Technology Learned:
+
+
+Why I Needed It:
+
+
+How I Learned It:
+
+
+How I Applied It:
+
+
+Challenges:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Tell Me About a Time You Made a Mistake",
+                        description: "Share a professional mistake, what you learned, and how you grew from it. Be honest but strategic.",
+                        examples: [
+                            { input: 'Learning experience', output: 'Your mistake and growth story' }
+                        ],
+                        starterCode: {
+                            python: `"""
+The Mistake:
+
+
+Context:
+
+
+What Went Wrong:
+
+
+Immediate Actions I Took:
+
+
+Impact:
+
+
+What I Learned:
+1. 
+2. 
+3. 
+
+How I've Changed:
+
+
+How It Made Me Better:
+
+
+"""`,
+                            javascript: `/*
+The Mistake:
+
+
+Context:
+
+
+What Went Wrong:
+
+
+Immediate Actions I Took:
+
+
+Impact:
+
+
+What I Learned:
+1. 
+2. 
+3. 
+
+How I've Changed:
+
+
+How It Made Me Better:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "How Do You Handle Code Reviews?",
+                        description: "Explain your approach both as a reviewer and as someone receiving feedback. How do you ensure constructive communication?",
+                        examples: [
+                            { input: 'Collaboration practice', output: 'Your code review philosophy' }
+                        ],
+                        starterCode: {
+                            python: `"""
+As a Code Reviewer:
+
+What I Look For:
+- 
+- 
+- 
+
+How I Give Feedback:
+
+
+Example of Constructive Feedback:
+
+
+When Receiving Reviews:
+
+My Mindset:
+
+
+How I Respond to Feedback:
+
+
+Example of Implementing Feedback:
+
+
+Benefits of Code Reviews:
+
+
+"""`,
+                            javascript: `/*
+As a Code Reviewer:
+
+What I Look For:
+- 
+- 
+- 
+
+How I Give Feedback:
+
+
+Example of Constructive Feedback:
+
+
+When Receiving Reviews:
+
+My Mindset:
+
+
+How I Respond to Feedback:
+
+
+Example of Implementing Feedback:
+
+
+Benefits of Code Reviews:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What Are Your Strengths?",
+                        description: "Identify 2-3 key strengths relevant to software development. Provide specific examples of each.",
+                        examples: [
+                            { input: 'Self-assessment', output: 'Your strengths with evidence' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Strength 1:
+
+Why It's a Strength:
+
+
+Example Demonstrating This:
+
+
+How It Helps Me as a Developer:
+
+
+Strength 2:
+
+Why It's a Strength:
+
+
+Example Demonstrating This:
+
+
+How It Helps Me as a Developer:
+
+
+Strength 3:
+
+Why It's a Strength:
+
+
+Example Demonstrating This:
+
+
+How It Helps Me as a Developer:
+
+
+"""`,
+                            javascript: `/*
+Strength 1:
+
+Why It's a Strength:
+
+
+Example Demonstrating This:
+
+
+How It Helps Me as a Developer:
+
+
+Strength 2:
+
+Why It's a Strength:
+
+
+Example Demonstrating This:
+
+
+How It Helps Me as a Developer:
+
+
+Strength 3:
+
+Why It's a Strength:
+
+
+Example Demonstrating This:
+
+
+How It Helps Me as a Developer:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "What Are Your Weaknesses?",
+                        description: "Share a genuine weakness and what you're doing to improve it. Avoid clichés like 'I'm a perfectionist.'",
+                        examples: [
+                            { input: 'Self-awareness', output: 'Your weakness and improvement plan' }
+                        ],
+                        starterCode: {
+                            python: `"""
+My Weakness:
+
+
+Why This Is a Weakness:
+
+
+How It Has Affected My Work:
+
+
+What I'm Doing to Improve:
+
+1. 
+
+2. 
+
+3. 
+
+
+Progress So Far:
+
+
+How I Manage It Now:
+
+
+What I've Learned:
+
+
+"""`,
+                            javascript: `/*
+My Weakness:
+
+
+Why This Is a Weakness:
+
+
+How It Has Affected My Work:
+
+
+What I'm Doing to Improve:
+
+1. 
+
+2. 
+
+3. 
+
+
+Progress So Far:
+
+
+How I Manage It Now:
+
+
+What I've Learned:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    }
+                ],
+                mid: [
+                    {
+                        title: "Describe a Time You Disagreed with a Technical Decision",
+                        description: "Tell a story about a technical disagreement. How did you handle it? What was the outcome? Show diplomacy and technical reasoning.",
+                        examples: [
+                            { input: 'Conflict resolution', output: 'Your professional disagreement story' }
+                        ],
+                        starterCode: {
+                            python: `"""
+SITUATION:
+What was the decision? Why did you disagree?
+
+
+My Position:
+
+
+Their Position:
+
+
+My Approach:
+
+1. How I Presented My Concerns:
+
+
+2. How I Listened to Their Perspective:
+
+
+3. The Discussion:
+
+
+OUTCOME:
+What decision was made?
+
+
+How I Handled It:
+
+
+What I Learned:
+
+
+Would I Do Anything Differently?
+
+
+"""`,
+                            javascript: `/*
+SITUATION:
+What was the decision? Why did you disagree?
+
+
+My Position:
+
+
+Their Position:
+
+
+My Approach:
+
+1. How I Presented My Concerns:
+
+
+2. How I Listened to Their Perspective:
+
+
+3. The Discussion:
+
+
+OUTCOME:
+What decision was made?
+
+
+How I Handled It:
+
+
+What I Learned:
+
+
+Would I Do Anything Differently?
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Tell Me About Leading a Technical Project",
+                        description: "Describe a time you led a project or mentored others. How did you motivate the team? What challenges did you face?",
+                        examples: [
+                            { input: 'Leadership experience', output: 'Your leadership story' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Project Overview:
+
+
+My Role & Responsibilities:
+
+
+Team Composition:
+
+
+Leadership Approach:
+
+1. How I Set Direction:
+
+
+2. How I Motivated the Team:
+
+
+3. How I Handled Challenges:
+
+
+Specific Challenge:
+
+
+My Solution:
+
+
+Team Dynamics:
+- What worked well:
+- What was difficult:
+
+
+Results:
+
+
+Key Takeaways:
+
+
+"""`,
+                            javascript: `/*
+Project Overview:
+
+
+My Role & Responsibilities:
+
+
+Team Composition:
+
+
+Leadership Approach:
+
+1. How I Set Direction:
+
+
+2. How I Motivated the Team:
+
+
+3. How I Handled Challenges:
+
+
+Specific Challenge:
+
+
+My Solution:
+
+
+Team Dynamics:
+- What worked well:
+- What was difficult:
+
+
+Results:
+
+
+Key Takeaways:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Describe Improving a System's Performance",
+                        description: "Share a story about optimizing performance. What was slow? How did you identify the issue? What was your solution and impact?",
+                        examples: [
+                            { input: 'Technical achievement', output: 'Your optimization story' }
+                        ],
+                        starterCode: {
+                            python: `"""
+The Problem:
+What was slow? How bad was it?
+
+
+Business Impact:
+
+
+Investigation Process:
+
+1. 
+
+2. 
+
+3. 
+
+Tools Used:
+- 
+- 
+
+Root Cause:
+
+
+My Solution:
+
+
+Implementation Challenges:
+
+
+Results:
+- Before:
+- After:
+- Impact:
+
+What I Learned:
+
+
+Follow-up Actions:
+
+
+"""`,
+                            javascript: `/*
+The Problem:
+What was slow? How bad was it?
+
+
+Business Impact:
+
+
+Investigation Process:
+
+1. 
+
+2. 
+
+3. 
+
+Tools Used:
+- 
+- 
+
+Root Cause:
+
+
+My Solution:
+
+
+Implementation Challenges:
+
+
+Results:
+- Before:
+- After:
+- Impact:
+
+What I Learned:
+
+
+Follow-up Actions:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Handling Multiple Competing Priorities",
+                        description: "Describe a situation with multiple urgent tasks. How did you prioritize? How did you communicate with stakeholders?",
+                        examples: [
+                            { input: 'Time management', output: 'Your prioritization strategy' }
+                        ],
+                        starterCode: {
+                            python: `"""
+The Situation:
+List the competing priorities:
+1. 
+2. 
+3. 
+
+
+My Prioritization Framework:
+
+
+How I Evaluated Each Task:
+- Urgency:
+- Impact:
+- Dependencies:
+- Resources needed:
+
+My Decision:
+
+
+Communication Strategy:
+
+With Manager:
+
+
+With Stakeholders:
+
+
+With Team:
+
+
+Execution:
+
+
+Outcome:
+
+
+Lessons Learned:
+
+
+"""`,
+                            javascript: `/*
+The Situation:
+List the competing priorities:
+1. 
+2. 
+3. 
+
+
+My Prioritization Framework:
+
+
+How I Evaluated Each Task:
+- Urgency:
+- Impact:
+- Dependencies:
+- Resources needed:
+
+My Decision:
+
+
+Communication Strategy:
+
+With Manager:
+
+
+With Stakeholders:
+
+
+With Team:
+
+
+Execution:
+
+
+Outcome:
+
+
+Lessons Learned:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Dealing with Ambiguous Requirements",
+                        description: "Tell about a time when requirements were unclear. How did you handle the ambiguity? How did you move forward?",
+                        examples: [
+                            { input: 'Problem solving', output: 'Your approach to uncertainty' }
+                        ],
+                        starterCode: {
+                            python: `"""
+The Situation:
+What was unclear?
+
+
+Why It Was Problematic:
+
+
+My Approach:
+
+1. Questions I Asked:
+
+
+2. Research I Did:
+
+
+3. Assumptions I Made (and documented):
+
+
+4. How I Validated:
+
+
+Communication:
+
+
+Solution/Approach I Took:
+
+
+How I Handled Changing Requirements:
+
+
+Outcome:
+
+
+What I'd Do Differently:
+
+
+"""`,
+                            javascript: `/*
+The Situation:
+What was unclear?
+
+
+Why It Was Problematic:
+
+
+My Approach:
+
+1. Questions I Asked:
+
+
+2. Research I Did:
+
+
+3. Assumptions I Made (and documented):
+
+
+4. How I Validated:
+
+
+Communication:
+
+
+Solution/Approach I Took:
+
+
+How I Handled Changing Requirements:
+
+
+Outcome:
+
+
+What I'd Do Differently:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Advocating for Technical Debt Reduction",
+                        description: "Describe convincing stakeholders to address technical debt. How did you make the business case? What was the result?",
+                        examples: [
+                            { input: 'Influence & communication', output: 'Your advocacy story' }
+                        ],
+                        starterCode: {
+                            python: `"""
+The Technical Debt:
+What was it?
+
+
+Impact on the Business:
+- Development velocity:
+- Bug rate:
+- Other impacts:
+
+
+The Challenge:
+Why was it hard to get buy-in?
+
+
+My Strategy:
+
+1. How I Built the Business Case:
+
+
+2. Data/Metrics I Gathered:
+
+
+3. How I Presented It:
+
+
+Stakeholder Concerns:
+
+
+How I Addressed Them:
+
+
+The Outcome:
+
+
+Implementation:
+
+
+Results:
+
+
+Lessons About Influence:
+
+
+"""`,
+                            javascript: `/*
+The Technical Debt:
+What was it?
+
+
+Impact on the Business:
+- Development velocity:
+- Bug rate:
+- Other impacts:
+
+
+The Challenge:
+Why was it hard to get buy-in?
+
+
+My Strategy:
+
+1. How I Built the Business Case:
+
+
+2. Data/Metrics I Gathered:
+
+
+3. How I Presented It:
+
+
+Stakeholder Concerns:
+
+
+How I Addressed Them:
+
+
+The Outcome:
+
+
+Implementation:
+
+
+Results:
+
+
+Lessons About Influence:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Cross-Functional Collaboration",
+                        description: "Describe working with non-technical teams (design, product, marketing). What challenges arose? How did you bridge the gap?",
+                        examples: [
+                            { input: 'Teamwork', output: 'Your collaboration story' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Project & Teams Involved:
+
+
+My Role:
+
+
+The Collaboration Challenge:
+
+
+Communication Strategies:
+
+1. How I Explained Technical Concepts:
+
+
+2. How I Understood Their Needs:
+
+
+3. Regular Touchpoints:
+
+
+Specific Challenge Example:
+
+
+My Approach:
+
+
+Building Trust:
+
+
+Outcome:
+
+
+What Made It Successful:
+
+
+What I Learned About Collaboration:
+
+
+"""`,
+                            javascript: `/*
+Project & Teams Involved:
+
+
+My Role:
+
+
+The Collaboration Challenge:
+
+
+Communication Strategies:
+
+1. How I Explained Technical Concepts:
+
+
+2. How I Understood Their Needs:
+
+
+3. Regular Touchpoints:
+
+
+Specific Challenge Example:
+
+
+My Approach:
+
+
+Building Trust:
+
+
+Outcome:
+
+
+What Made It Successful:
+
+
+What I Learned About Collaboration:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Implementing a New Technology or Process",
+                        description: "Tell about introducing a new technology, tool, or process to your team. How did you get buy-in? How did you ensure adoption?",
+                        examples: [
+                            { input: 'Change management', output: 'Your implementation story' }
+                        ],
+                        starterCode: {
+                            python: `"""
+The Change:
+What did you want to implement?
+
+
+Why It Was Needed:
+
+
+The Challenge:
+
+
+My Strategy:
+
+1. Research & Proof of Concept:
+
+
+2. Building Consensus:
+
+
+3. Creating Champions:
+
+
+4. Training & Documentation:
+
+
+Resistance I Faced:
+
+
+How I Handled It:
+
+
+Rollout Plan:
+
+
+Measuring Success:
+
+
+Results:
+
+
+Lessons on Change Management:
+
+
+"""`,
+                            javascript: `/*
+The Change:
+What did you want to implement?
+
+
+Why It Was Needed:
+
+
+The Challenge:
+
+
+My Strategy:
+
+1. Research & Proof of Concept:
+
+
+2. Building Consensus:
+
+
+3. Creating Champions:
+
+
+4. Training & Documentation:
+
+
+Resistance I Faced:
+
+
+How I Handled It:
+
+
+Rollout Plan:
+
+
+Measuring Success:
+
+
+Results:
+
+
+Lessons on Change Management:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Handling a Failed Project or Feature",
+                        description: "Share a time when a project didn't succeed. What happened? How did you handle it? What did you learn?",
+                        examples: [
+                            { input: 'Resilience', output: 'Your failure and recovery story' }
+                        ],
+                        starterCode: {
+                            python: `"""
+The Project:
+
+
+What We Were Trying to Achieve:
+
+
+What Went Wrong:
+
+
+Warning Signs:
+- 
+- 
+
+My Role in the Failure:
+
+
+How I Responded:
+
+Immediately:
+
+
+With the Team:
+
+
+With Stakeholders:
+
+
+Lessons Learned:
+
+Technical:
+
+
+Process:
+
+
+Personal:
+
+
+How It Changed My Approach:
+
+
+Later Success Based on These Lessons:
+
+
+"""`,
+                            javascript: `/*
+The Project:
+
+
+What We Were Trying to Achieve:
+
+
+What Went Wrong:
+
+
+Warning Signs:
+- 
+- 
+
+My Role in the Failure:
+
+
+How I Responded:
+
+Immediately:
+
+
+With the Team:
+
+
+With Stakeholders:
+
+
+Lessons Learned:
+
+Technical:
+
+
+Process:
+
+
+Personal:
+
+
+How It Changed My Approach:
+
+
+Later Success Based on These Lessons:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    },
+                    {
+                        title: "Where Do You See Yourself in 5 Years?",
+                        description: "Share your career vision. Show ambition while staying relevant to the role. Connect your goals with the company's direction.",
+                        examples: [
+                            { input: 'Career planning', output: 'Your career vision' }
+                        ],
+                        starterCode: {
+                            python: `"""
+Short-term (1-2 years):
+
+Technical Goals:
+- 
+- 
+
+Professional Goals:
+- 
+- 
+
+
+Mid-term (3-5 years):
+
+Where I Want to Be:
+
+
+Skills I Want to Develop:
+- 
+- 
+- 
+
+Type of Projects:
+
+
+Leadership/Impact:
+
+
+How This Role Fits:
+
+
+What Success Looks Like:
+
+
+Areas I'm Excited to Explore:
+
+
+How I Plan to Get There:
+
+
+"""`,
+                            javascript: `/*
+Short-term (1-2 years):
+
+Technical Goals:
+- 
+- 
+
+Professional Goals:
+- 
+- 
+
+
+Mid-term (3-5 years):
+
+Where I Want to Be:
+
+
+Skills I Want to Develop:
+- 
+- 
+- 
+
+Type of Projects:
+
+
+Leadership/Impact:
+
+
+How This Role Fits:
+
+
+What Success Looks Like:
+
+
+Areas I'm Excited to Explore:
+
+
+How I Plan to Get There:
+
+
+*/`
+                        },
+                        testCases: [
+                            { input: ['behavioral'], expected: 'text-answer' }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        function loadChallenge() {
+            const category = document.getElementById('category').value;
+            const difficulty = document.getElementById('difficulty').value;
+            
+            const challengeList = challenges[category][difficulty];
+            currentChallenge = challengeList[Math.floor(Math.random() * challengeList.length)];
+            
+            displayChallenge();
+        }
+
+        function displayChallenge() {
+            document.getElementById('questionTitle').textContent = currentChallenge.title;
+            
+            const badge = document.getElementById('difficultyBadge');
+            const difficulty = document.getElementById('difficulty').value;
+            badge.textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+            badge.className = 'difficulty-badge difficulty-' + difficulty;
+            
+            document.getElementById('questionDescription').textContent = currentChallenge.description;
+            
+            const examplesDiv = document.getElementById('examples');
+            const examplesList = document.getElementById('examplesList');
+            examplesList.innerHTML = '';
+            
+            currentChallenge.examples.forEach(ex => {
+                const exampleDiv = document.createElement('div');
+                exampleDiv.className = 'example';
+                exampleDiv.innerHTML = `<strong>Input:</strong> ${ex.input}<br><strong>Output:</strong> ${ex.output}`;
+                examplesList.appendChild(exampleDiv);
+            });
+            
+            examplesDiv.style.display = 'block';
+            
+            resetCode();
+        }
+
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            if (currentChallenge) {
+                document.getElementById('codeInput').value = currentChallenge.starterCode[lang];
+            }
+        }
+
+        function resetCode() {
+            if (currentChallenge) {
+                document.getElementById('codeInput').value = currentChallenge.starterCode[currentLanguage];
+            }
+        }
+
+        function runCode() {
+            if (!currentChallenge) {
+                alert('Please load a challenge first!');
+                return;
+            }
+
+            const code = document.getElementById('codeInput').value;
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = '';
+
+            // Handle situational and behavioral questions (text-based responses)
+            const category = document.getElementById('category').value;
+            if (category === 'situational' || category === 'behavioral') {
+                const summary = document.createElement('div');
+                summary.className = 'summary success';
+                
+                if (category === 'behavioral') {
+                    summary.innerHTML = `
+                        <div style="margin-bottom: 15px;">✅ Your response has been recorded!</div>
+                        <div style="font-size: 0.9em; color: #666; font-weight: normal;">
+                            This is a behavioral question. Review your answer using the STAR method:
+                            <br>• <strong>S</strong>ituation - Did you set the context?
+                            <br>• <strong>T</strong>ask - Did you explain your responsibility?
+                            <br>• <strong>A</strong>ction - Did you detail what you did?
+                            <br>• <strong>R</strong>esult - Did you share the outcome and learnings?
+                        </div>
+                    `;
+                } else {
+                    summary.innerHTML = `
+                        <div style="margin-bottom: 15px;">✍️ Your response has been recorded!</div>
+                        <div style="font-size: 0.9em; color: #666; font-weight: normal;">
+                            This is a conceptual question. Review your answer and consider:
+                            <br>• Is it clear and well-structured?
+                            <br>• Have you covered all key points?
+                            <br>• Could you explain this to a colleague?
+                        </div>
+                    `;
+                }
+                
+                outputDiv.appendChild(summary);
+                return;
+            }
+
+            let passed = 0;
+            let failed = 0;
+
+            currentChallenge.testCases.forEach((testCase, index) => {
+                try {
+                    let result;
+                    
+                    if (currentLanguage === 'javascript') {
+                        result = executeJavaScript(code, testCase.input);
+                    } else {
+                        result = executePython(code, testCase.input);
+                    }
+
+                    const isPassed = deepEqual(result, testCase.expected);
+                    
+                    const testDiv = document.createElement('div');
+                    testDiv.className = `test-case ${isPassed ? 'passed' : 'failed'}`;
+                    
+                    testDiv.innerHTML = `
+                        <div class="test-case-header">${isPassed ? '✓' : '✗'} Test Case ${index + 1}</div>
+                        <div class="test-case-details">
+                            Input: ${JSON.stringify(testCase.input)}<br>
+                            Expected: ${JSON.stringify(testCase.expected)}<br>
+                            Got: ${JSON.stringify(result)}
+                        </div>
+                    `;
+                    
+                    outputDiv.appendChild(testDiv);
+                    
+                    if (isPassed) passed++;
+                    else failed++;
+                    
+                } catch (error) {
+                    const testDiv = document.createElement('div');
+                    testDiv.className = 'test-case failed';
+                    testDiv.innerHTML = `
+                        <div class="test-case-header">✗ Test Case ${index + 1} - Error</div>
+                        <div class="test-case-details">
+                            ${error.message}
+                        </div>
+                    `;
+                    outputDiv.appendChild(testDiv);
+                    failed++;
+                }
+            });
+
+            const summary = document.createElement('div');
+            summary.className = `summary ${failed === 0 ? 'success' : 'error'}`;
+            summary.textContent = failed === 0 
+                ? `🎉 All tests passed! (${passed}/${passed + failed})`
+                : `${passed}/${passed + failed} tests passed`;
+            outputDiv.appendChild(summary);
+        }
+
+        function executeJavaScript(code, inputs) {
+            const funcName = currentChallenge.starterCode.javascript.match(/function\s+(\w+)/)[1];
+            const wrappedCode = `
+                ${code}
+                return ${funcName}(...arguments);
+            `;
+            const func = new Function(wrappedCode);
+            return func(...inputs);
+        }
+
+        function executePython(code, inputs) {
+            // Simple Python interpreter for basic operations
+            // This is a simplified version - in production, you'd use a backend API
+            alert('Python execution requires a backend server. For this demo, please use JavaScript. In a real application, you would send the code to a Python execution API.');
+            throw new Error('Python execution not available in browser demo');
+        }
+
+        function deepEqual(a, b) {
+            if (a === b) return true;
+            if (a == null || b == null) return false;
+            if (typeof a !== typeof b) return false;
+            
+            if (Array.isArray(a) && Array.isArray(b)) {
+                if (a.length !== b.length) return false;
+                for (let i = 0; i < a.length; i++) {
+                    if (!deepEqual(a[i], b[i])) return false;
+                }
+                return true;
+            }
+            
+            if (typeof a === 'object' && typeof b === 'object') {
+                const keysA = Object.keys(a).sort();
+                const keysB = Object.keys(b).sort();
+                if (!deepEqual(keysA, keysB)) return false;
+                for (let key of keysA) {
+                    if (!deepEqual(a[key], b[key])) return false;
+                }
+                return true;
+            }
+            
+            return false;
+        }
+
+        // Load a default challenge on page load
+        window.onload = function() {
+            loadChallenge();
+        };
+    </script>
+</body>
+</html>
