@@ -315,6 +315,184 @@
                 flex-direction: column;
             }
         }
+
+        /* Response Viewer Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 85vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .close-btn {
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #f0f0f0;
+        }
+
+        .modal-body {
+            padding: 30px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .response-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .response-filters select {
+            padding: 10px 16px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .responses-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .response-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .response-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .response-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .response-code {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .response-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .response-result.passed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .response-result.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .no-responses {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .no-responses h3 {
+            margin-bottom: 10px;
+        }
+
+        .export-btn {
+            background: #17a2b8;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .export-btn:hover {
+            background: #138496;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -348,6 +526,16 @@
                 <label>&nbsp;</label>
                 <button onclick="loadChallenge()">Load Challenge</button>
             </div>
+
+            <div class="control-group">
+                <label>&nbsp;</label>
+                <button onclick="viewResponses()" style="background: #28a745;">📊 View My Responses</button>
+            </div>
+
+            <div class="control-group">
+                <label>&nbsp;</label>
+                <button onclick="downloadMyResponses()" style="background: #17a2b8;">📥 Download My Work</button>
+            </div>
         </div>
 
         <div class="main-content">
@@ -377,6 +565,7 @@
                 <div class="action-buttons">
                     <button class="run-btn" onclick="runCode()">▶ Run Code</button>
                     <button class="reset-btn" onclick="resetCode()">↻ Reset</button>
+                    <button onclick="saveResponse()" style="background: #28a745;">💾 Save Response</button>
                 </div>
             </div>
         </div>
@@ -385,6 +574,42 @@
             <h3>Output & Test Results</h3>
             <div id="output" class="test-results">
                 <p style="color: #6c757d;">Run your code to see test results here...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Response Viewer Modal -->
+    <div id="responseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📊 My Saved Responses</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="response-filters">
+                    <select id="filterCategory" onchange="filterResponses()">
+                        <option value="">All Categories</option>
+                        <option value="general">General Development</option>
+                        <option value="frontend">Frontend Development</option>
+                        <option value="backend">Backend Development</option>
+                        <option value="situational">Situational & Concepts</option>
+                        <option value="behavioral">Behavioral Questions</option>
+                    </select>
+                    <select id="filterDifficulty" onchange="filterResponses()">
+                        <option value="">All Difficulties</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="mid">Mid Level</option>
+                    </select>
+                    <select id="filterLanguage" onchange="filterResponses()">
+                        <option value="">All Languages</option>
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                    </select>
+                    <button class="export-btn" onclick="exportResponses()">📥 Export CSV</button>
+                </div>
+                <div id="responsesContainer" class="responses-grid">
+                    <!-- Responses will be loaded here -->
+                </div>
             </div>
         </div>
     </div>
@@ -5577,6 +5802,441 @@ except Exception as e:
             }
             
             return false;
+        }
+
+        // Response Management Functions
+        function saveResponse() {
+            if (!currentChallenge) {
+                alert('Please load a challenge first!');
+                return;
+            }
+
+            const code = editor.getValue();
+            const category = document.getElementById('category').value;
+            const difficulty = document.getElementById('difficulty').value;
+
+            const response = {
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                userName: prompt('Enter your name (optional):') || 'Anonymous',
+                category: category,
+                difficulty: difficulty,
+                language: currentLanguage,
+                challengeTitle: currentChallenge.title,
+                code: code,
+                testResults: null
+            };
+
+            // Get existing responses
+            let responses = JSON.parse(localStorage.getItem('codingResponses') || '[]');
+            responses.push(response);
+            localStorage.setItem('codingResponses', JSON.stringify(responses));
+
+            alert('✅ Response saved successfully!');
+        }
+
+        function viewResponses() {
+            const modal = document.getElementById('responseModal');
+            modal.style.display = 'block';
+            loadResponses();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('responseModal');
+            modal.style.display = 'none';
+        }
+
+        function loadResponses() {
+            const responses = JSON.parse(localStorage.getItem('codingResponses') || '[]');
+            displayResponses(responses);
+        }
+
+        function filterResponses() {
+            const responses = JSON.parse(localStorage.getItem('codingResponses') || '[]');
+            const categoryFilter = document.getElementById('filterCategory').value;
+            const difficultyFilter = document.getElementById('filterDifficulty').value;
+            const languageFilter = document.getElementById('filterLanguage').value;
+
+            const filtered = responses.filter(r => {
+                return (!categoryFilter || r.category === categoryFilter) &&
+                       (!difficultyFilter || r.difficulty === difficultyFilter) &&
+                       (!languageFilter || r.language === languageFilter);
+            });
+
+            displayResponses(filtered);
+        }
+
+        function displayResponses(responses) {
+            const container = document.getElementById('responsesContainer');
+            
+            if (responses.length === 0) {
+                container.innerHTML = `
+                    <div class="no-responses">
+                        <h3>No responses yet</h3>
+                        <p>Responses will appear here once users save their solutions.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort by timestamp, newest first
+            responses.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            container.innerHTML = responses.map(response => `
+                <div class="response-card">
+                    <div class="response-header">
+                        <div>
+                            <h3 style="margin: 0 0 10px 0; color: #667eea;">${response.challengeTitle}</h3>
+                            <div class="response-meta">
+                                <span>👤 ${response.userName}</span>
+                                <span>📅 ${new Date(response.timestamp).toLocaleString()}</span>
+                                <span>💻 ${response.language}</span>
+                                <span>📊 ${response.category} - ${response.difficulty}</span>
+                            </div>
+                        </div>
+                        <button class="delete-btn" onclick="deleteResponse(${response.id})">🗑️ Delete</button>
+                    </div>
+                    <div class="response-code">${escapeHtml(response.code)}</div>
+                </div>
+            `).join('');
+        }
+
+        function deleteResponse(id) {
+            if (!confirm('Are you sure you want to delete this response?')) {
+                return;
+            }
+
+            let responses = JSON.parse(localStorage.getItem('codingResponses') || '[]');
+            responses = responses.filter(r => r.id !== id);
+            localStorage.setItem('codingResponses', JSON.stringify(responses));
+            filterResponses(); // Refresh display with current filters
+        }
+
+        function exportResponses() {
+            const responses = JSON.parse(localStorage.getItem('codingResponses') || '[]');
+            
+            if (responses.length === 0) {
+                alert('No responses to export!');
+                return;
+            }
+
+            // Create CSV
+            const headers = ['Timestamp', 'User', 'Category', 'Difficulty', 'Language', 'Challenge', 'Code'];
+            const csvRows = [headers.join(',')];
+
+            responses.forEach(r => {
+                const row = [
+                    new Date(r.timestamp).toLocaleString(),
+                    r.userName,
+                    r.category,
+                    r.difficulty,
+                    r.language,
+                    r.challengeTitle,
+                    `"${r.code.replace(/"/g, '""')}"`
+                ];
+                csvRows.push(row.join(','));
+            });
+
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `coding-responses-${Date.now()}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function downloadMyResponses() {
+            const responses = JSON.parse(localStorage.getItem('codingResponses') || '[]');
+            
+            if (responses.length === 0) {
+                alert('No responses saved yet! Complete some challenges and save your responses first.');
+                return;
+            }
+
+            // Show download format options
+            const format = prompt(
+                'Choose download format:\n\n' +
+                '1 - JSON (all data, can be imported later)\n' +
+                '2 - PDF Report (formatted, printable)\n' +
+                '3 - Text File (simple, readable)\n' +
+                '4 - HTML Portfolio (shareable webpage)\n' +
+                '5 - CSV (spreadsheet compatible)\n\n' +
+                'Enter 1, 2, 3, 4, or 5:'
+            );
+
+            switch(format) {
+                case '1':
+                    downloadAsJSON(responses);
+                    break;
+                case '2':
+                    downloadAsPDF(responses);
+                    break;
+                case '3':
+                    downloadAsText(responses);
+                    break;
+                case '4':
+                    downloadAsHTML(responses);
+                    break;
+                case '5':
+                    downloadAsCSV(responses);
+                    break;
+                default:
+                    if (format !== null) {
+                        alert('Invalid selection. Please enter 1, 2, 3, 4, or 5.');
+                    }
+            }
+        }
+
+        function downloadAsJSON(responses) {
+            const dataStr = JSON.stringify(responses, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `my-coding-practice-${Date.now()}.json`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            alert('✅ JSON file downloaded! You can import this later to restore your progress.');
+        }
+
+        function downloadAsText(responses) {
+            let content = '═══════════════════════════════════════════════════════\n';
+            content += '         MY CODING PRACTICE SOLUTIONS\n';
+            content += '═══════════════════════════════════════════════════════\n\n';
+            content += `Total Solutions: ${responses.length}\n`;
+            content += `Generated: ${new Date().toLocaleString()}\n\n`;
+
+            responses.forEach((r, index) => {
+                content += '───────────────────────────────────────────────────────\n';
+                content += `Solution #${index + 1}\n`;
+                content += '───────────────────────────────────────────────────────\n';
+                content += `Challenge: ${r.challengeTitle}\n`;
+                content += `Category: ${r.category} | Difficulty: ${r.difficulty}\n`;
+                content += `Language: ${r.language}\n`;
+                content += `User: ${r.userName}\n`;
+                content += `Date: ${new Date(r.timestamp).toLocaleString()}\n\n`;
+                content += 'CODE:\n';
+                content += '```\n';
+                content += r.code;
+                content += '\n```\n\n';
+            });
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `my-coding-solutions-${Date.now()}.txt`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            alert('✅ Text file downloaded!');
+        }
+
+        function downloadAsHTML(responses) {
+            const userName = responses[0]?.userName || 'Anonymous';
+            
+            let html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${userName}'s Coding Portfolio</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header p { font-size: 1.2em; opacity: 0.9; }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .stat { text-align: center; }
+        .stat-number { font-size: 2em; font-weight: bold; color: #667eea; }
+        .stat-label { color: #666; margin-top: 5px; }
+        .solutions { padding: 40px; }
+        .solution-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+        .solution-header {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .solution-title { font-size: 1.5em; color: #667eea; margin-bottom: 10px; }
+        .solution-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .badge-beginner { background: #d4edda; color: #155724; }
+        .badge-mid { background: #fff3cd; color: #856404; }
+        .badge-python { background: #306998; color: white; }
+        .badge-javascript { background: #f7df1e; color: #000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💻 ${userName}'s Coding Portfolio</h1>
+            <p>Practice Solutions & Progress Report</p>
+        </div>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">${responses.length}</div>
+                <div class="stat-label">Total Solutions</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">${new Set(responses.map(r => r.challengeTitle)).size}</div>
+                <div class="stat-label">Unique Challenges</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">${responses.filter(r => r.language === 'python').length}</div>
+                <div class="stat-label">Python Solutions</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">${responses.filter(r => r.language === 'javascript').length}</div>
+                <div class="stat-label">JavaScript Solutions</div>
+            </div>
+        </div>
+        <div class="solutions">
+            <h2 style="margin-bottom: 30px; color: #667eea;">My Solutions</h2>
+`;
+
+            responses.forEach((r, index) => {
+                html += `
+            <div class="solution-card">
+                <div class="solution-header">
+                    <div class="solution-title">${index + 1}. ${r.challengeTitle}</div>
+                    <div class="solution-meta">
+                        <span>📅 ${new Date(r.timestamp).toLocaleString()}</span>
+                        <span>📂 ${r.category}</span>
+                        <span class="badge badge-${r.difficulty}">${r.difficulty}</span>
+                        <span class="badge badge-${r.language}">${r.language}</span>
+                    </div>
+                </div>
+                <pre class="code-block">${escapeHtml(r.code)}</pre>
+            </div>
+`;
+            });
+
+            html += `
+        </div>
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${userName}-coding-portfolio-${Date.now()}.html`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            alert('✅ HTML portfolio downloaded! Open it in any browser to view your work.');
+        }
+
+        function downloadAsCSV(responses) {
+            const headers = ['Timestamp', 'User', 'Category', 'Difficulty', 'Language', 'Challenge', 'Code'];
+            const csvRows = [headers.join(',')];
+
+            responses.forEach(r => {
+                const row = [
+                    new Date(r.timestamp).toLocaleString(),
+                    r.userName,
+                    r.category,
+                    r.difficulty,
+                    r.language,
+                    r.challengeTitle,
+                    `"${r.code.replace(/"/g, '""').replace(/\n/g, '\\n')}"`
+                ];
+                csvRows.push(row.join(','));
+            });
+
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `my-coding-practice-${Date.now()}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            alert('✅ CSV file downloaded! Open in Excel or Google Sheets.');
+        }
+
+        function downloadAsPDF(responses) {
+            alert('📄 PDF generation requires a library. For now, please use:\n\n' +
+                  '1. Download as HTML\n' +
+                  '2. Open the HTML file in your browser\n' +
+                  '3. Use your browser\'s "Print to PDF" feature\n\n' +
+                  'This gives you a beautiful PDF portfolio!');
+            
+            // Automatically download HTML instead
+            downloadAsHTML(responses);
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('responseModal');
+            if (event.target === modal) {
+                closeModal();
+            }
         }
 
         // Load a default challenge on page load
