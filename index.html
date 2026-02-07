@@ -203,23 +203,13 @@
 
         .code-editor {
             flex: 1;
-            padding: 20px;
             background: #1e1e1e;
-            overflow-y: auto;
+            overflow: hidden;
         }
 
-        textarea {
+        #editor-container {
             width: 100%;
-            height: 400px;
-            background: #1e1e1e;
-            color: #d4d4d4;
-            border: none;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            resize: vertical;
-            outline: none;
-            padding: 0;
+            height: 450px;
         }
 
         .action-buttons {
@@ -382,7 +372,7 @@
                     <span style="color: #ccc; font-size: 0.9em;">Code Editor</span>
                 </div>
                 <div class="code-editor">
-                    <textarea id="codeInput" placeholder="Write your code here..."></textarea>
+                    <div id="editor-container"></div>
                 </div>
                 <div class="action-buttons">
                     <button class="run-btn" onclick="runCode()">▶ Run Code</button>
@@ -399,9 +389,40 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
     <script>
         let currentLanguage = 'python';
         let currentChallenge = null;
+        let editor = null;
+
+        // Initialize Monaco Editor
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+        
+        require(['vs/editor/editor.main'], function () {
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: '// Select a challenge to begin',
+                language: 'python',
+                theme: 'vs-dark',
+                fontSize: 14,
+                minimap: { enabled: false },
+                automaticLayout: true,
+                scrollBeyondLastLine: false,
+                tabSize: 4,
+                insertSpaces: true,
+                wordWrap: 'on',
+                lineNumbers: 'on',
+                renderLineHighlight: 'all',
+                scrollbar: {
+                    verticalScrollbarSize: 10,
+                    horizontalScrollbarSize: 10
+                }
+            });
+
+            // Load a challenge after editor is ready
+            setTimeout(() => {
+                loadChallenge();
+            }, 100);
+        });
 
         const challenges = {
             general: {
@@ -5322,30 +5343,41 @@ How I Plan to Get There:
             });
             event.target.classList.add('active');
             
-            if (currentChallenge) {
-                document.getElementById('codeInput').value = currentChallenge.starterCode[lang];
+            if (currentChallenge && editor) {
+                const newCode = currentChallenge.starterCode[lang];
+                editor.setValue(newCode);
+                
+                // Set the Monaco editor language
+                const model = editor.getModel();
+                monaco.editor.setModelLanguage(model, lang === 'python' ? 'python' : 'javascript');
             }
         }
 
         function resetCode() {
-            if (currentChallenge) {
-                document.getElementById('codeInput').value = currentChallenge.starterCode[currentLanguage];
+            if (currentChallenge && editor) {
+                const starterCode = currentChallenge.starterCode[currentLanguage];
+                editor.setValue(starterCode);
+                
+                // Set the correct language mode
+                const model = editor.getModel();
+                monaco.editor.setModelLanguage(model, currentLanguage === 'python' ? 'python' : 'javascript');
             }
         }
 
-        function runCode() {
+        async function runCode() {
             if (!currentChallenge) {
                 alert('Please load a challenge first!');
                 return;
             }
 
-            const code = document.getElementById('codeInput').value;
+            const code = editor.getValue();
             const outputDiv = document.getElementById('output');
-            outputDiv.innerHTML = '';
+            outputDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Running tests...</div>';
 
             // Handle situational and behavioral questions (text-based responses)
             const category = document.getElementById('category').value;
             if (category === 'situational' || category === 'behavioral') {
+                outputDiv.innerHTML = '';
                 const summary = document.createElement('div');
                 summary.className = 'summary success';
                 
@@ -5379,14 +5411,17 @@ How I Plan to Get There:
             let passed = 0;
             let failed = 0;
 
-            currentChallenge.testCases.forEach((testCase, index) => {
+            outputDiv.innerHTML = '';
+
+            for (let index = 0; index < currentChallenge.testCases.length; index++) {
+                const testCase = currentChallenge.testCases[index];
                 try {
                     let result;
                     
                     if (currentLanguage === 'javascript') {
                         result = executeJavaScript(code, testCase.input);
                     } else {
-                        result = executePython(code, testCase.input);
+                        result = await executePython(code, testCase.input);
                     }
 
                     const isPassed = deepEqual(result, testCase.expected);
@@ -5420,7 +5455,7 @@ How I Plan to Get There:
                     outputDiv.appendChild(testDiv);
                     failed++;
                 }
-            });
+            }
 
             const summary = document.createElement('div');
             summary.className = `summary ${failed === 0 ? 'success' : 'error'}`;
@@ -5440,11 +5475,82 @@ How I Plan to Get There:
             return func(...inputs);
         }
 
-        function executePython(code, inputs) {
-            // Simple Python interpreter for basic operations
-            // This is a simplified version - in production, you'd use a backend API
-            alert('Python execution requires a backend server. For this demo, please use JavaScript. In a real application, you would send the code to a Python execution API.');
-            throw new Error('Python execution not available in browser demo');
+        async function executePython(code, inputs) {
+            // Use Piston API for Python execution
+            const pistonUrl = 'https://emkc.org/api/v2/piston/execute';
+            
+            // Extract function name from starter code
+            const funcMatch = currentChallenge.starterCode.python.match(/def\s+(\w+)/);
+            if (!funcMatch) {
+                throw new Error('Could not find function name in Python code');
+            }
+            const funcName = funcMatch[1];
+            
+            // Create wrapper code that calls the function and prints result as JSON
+            const wrappedCode = `
+import json
+import sys
+
+${code}
+
+# Test inputs
+inputs = ${JSON.stringify(inputs)}
+try:
+    result = ${funcName}(*inputs)
+    # Print only the JSON result, nothing else
+    sys.stdout.write(json.dumps(result))
+except Exception as e:
+    sys.stderr.write(str(e))
+    raise
+`;
+
+            try {
+                const response = await fetch(pistonUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        language: 'python',
+                        version: '3.10.0',
+                        files: [{
+                            content: wrappedCode
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.run && data.run.stderr) {
+                    throw new Error(data.run.stderr.trim());
+                }
+                
+                if (data.run && data.run.output) {
+                    const output = data.run.output.trim();
+                    
+                    // Remove any trailing newlines and parse JSON
+                    const cleanOutput = output.split('\n')[0]; // Take only first line
+                    
+                    try {
+                        return JSON.parse(cleanOutput);
+                    } catch (e) {
+                        // If JSON parsing fails, try to clean up and parse again
+                        const lastLine = output.split('\n').filter(line => line.trim()).pop();
+                        try {
+                            return JSON.parse(lastLine);
+                        } catch (e2) {
+                            throw new Error(`Failed to parse output: ${output}`);
+                        }
+                    }
+                } else {
+                    throw new Error('No output received from Python execution');
+                }
+            } catch (error) {
+                if (error.message.includes('fetch')) {
+                    throw new Error('Network error: Could not connect to Python execution service');
+                }
+                throw error;
+            }
         }
 
         function deepEqual(a, b) {
@@ -5475,7 +5581,7 @@ How I Plan to Get There:
 
         // Load a default challenge on page load
         window.onload = function() {
-            loadChallenge();
+            // Monaco editor will load the challenge after it's initialized
         };
     </script>
 </body>
